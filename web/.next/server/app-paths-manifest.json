@@ -1,7 +1,0 @@
-{
-  "/page": "app/page.js",
-  "/screening/page": "app/screening/page.js",
-  "/registry/page": "app/registry/page.js",
-  "/kit/page": "app/kit/page.js",
-  "/dashboard/page": "app/dashboard/page.js"
-}

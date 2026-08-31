@@ -18,3 +18,8 @@ artifacts/*.onnx
 .next/
 dist/
 build/
+.pio/
+packages/app/.parity/
+.claude
+server/server
+web/.next/

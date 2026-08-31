@@ -1,23 +1,40 @@
 {
   "expo": {
-    "name": "app",
-    "slug": "app",
+    "name": "SANDHI",
+    "slug": "sandhi",
+    "scheme": "sandhi",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSBluetoothAlwaysUsageDescription": "SANDHI connects to the knee screening kit over Bluetooth to capture motion and joint sound."
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#0d1117",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.BLUETOOTH_SCAN",
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
+    "plugins": [
+      [
+        "@sfourdrinier/react-native-ble-plx",
+        {
+          "bluetoothAlwaysPermission": "SANDHI connects to the knee screening kit over Bluetooth to capture motion and joint sound."
+        }
+      ]
+    ],
     "web": {
       "favicon": "./assets/favicon.png"
     }
