@@ -9,7 +9,7 @@
     "sync-artifacts": "cp ml/out/model.json ml/out/metrics.json ml/out/cohort.json web/public/data/ && cp data/districts.json web/public/data/",
     "parity": "cd web && npx tsc -p tsconfig.parity.json && printf '{\"type\":\"module\"}' > .parity/package.json && cd .. && node tools/parity_check.mjs",
     "dev": "cd web && npm run dev",
-    "build": "cd web && npm run build",
+    "build": "cd web && npm install && npm run build",
     "server": "cd server && go run .",
     "verify": "npm run train && npm run parity && npm run sync-artifacts"
   }
