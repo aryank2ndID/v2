@@ -1,4 +1,4 @@
-# ORTHO-NER: System Architecture & Vision
+# Sandhi: System Architecture & Vision
 
 ## 🎯 What We Are Trying to Achieve
 
