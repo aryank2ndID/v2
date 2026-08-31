@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "outDir": ".parity",
+    "rootDir": "lib",
+    "declaration": false
+  },
+  "include": ["lib/dsp/features.ts", "lib/dsp/simulator.ts", "lib/model/runtime.ts"]
+}
