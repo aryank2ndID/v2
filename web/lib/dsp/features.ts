@@ -17,8 +17,6 @@ export const FEATURE_NAMES = [
   // sit-to-stand — 5 reps
   "sts_total_s", "sts_mean_rep_s", "sts_peak_angvel_dps",
   "sts_smoothness_ldlj", "sts_rep_cv_pct", "sts_trunk_lean_dps",
-  // vibroarthrography — piezo over the joint line
-  "vag_hf_ratio", "vag_burst_rate_hz", "vag_spec_entropy", "vag_rms_x1000",
   // intake — asked by the ASHA worker
   "age", "sex_f", "bmi", "occ_squat_load", "stairs_per_day",
   "terrain_slope_idx", "prior_injury", "family_hx", "womac_pain", "womac_stiff",
@@ -33,10 +31,10 @@ export const INTAKE_FEATURES: string[] = [
 ];
 
 /** Channel grouping, used by the UI to show which sensor drove a decision. */
-export const FEATURE_CHANNEL: Record<string, "gait" | "sts" | "acoustic" | "intake"> =
+export const FEATURE_CHANNEL: Record<string, "gait" | "sts" | "intake"> =
   Object.fromEntries(FEATURE_NAMES.map((n, i) => [
-    n, i < 11 ? "gait" : i < 17 ? "sts" : i < 21 ? "acoustic" : "intake",
-  ])) as Record<string, "gait" | "sts" | "acoustic" | "intake">;
+    n, i < 11 ? "gait" : i < 17 ? "sts" : "intake",
+  ])) as Record<string, "gait" | "sts" | "intake">;
 
 /* ------------------------------------------------------------- helpers --- */
 
@@ -249,103 +247,13 @@ export function stsFeatures(sts: StsSignal): Features {
   };
 }
 
-/* ----------------------------------------------------------------- VAG --- */
-
-/** Band energy by direct correlation — no FFT dependency, matches Python. */
-export function bandEnergy(x: ArrayLike<number>, fs: number, lo: number, hi: number, nbands = 24) {
-  const n = x.length;
-  const edges = Array.from({ length: nbands + 1 }, (_, i) => lo + ((hi - lo) * i) / nbands);
-  const w = new Float64Array(n);
-  for (let i = 0; i < n; i++) w[i] = n > 8 ? 0.5 - 0.5 * Math.cos((2 * Math.PI * i) / (n - 1)) : 1;
-  const bands = new Float64Array(nbands);
-  const centers = new Float64Array(nbands);
-  for (let b = 0; b < nbands; b++) {
-    const f = 0.5 * (edges[b] + edges[b + 1]);
-    centers[b] = f;
-    const k = (2 * Math.PI * f) / fs;
-    let re = 0, im = 0;
-    for (let i = 0; i < n; i++) {
-      const v = x[i] * w[i];
-      re += v * Math.cos(k * i);
-      im += v * Math.sin(k * i);
-    }
-    bands[b] = (re * re + im * im) / (n * n);
-  }
-  return { bands, centers };
-}
-
-export interface VagResult {
-  vag_hf_ratio: number;
-  vag_burst_rate_hz: number;
-  vag_spec_entropy: number;
-  vag_rms_x1000: number;
-  /** 24-band spectrum, kept for the UI's spectrogram strip. Not a model input. */
-  _bands: number[];
-  _centers: number[];
-}
-
-export function vagFeatures(vag: { fs: number; mic: ArrayLike<number> }): VagResult {
-  const fs = vag.fs, x = vag.mic;
-  const dn = Math.ceil(x.length / 2);
-  const xd = new Float64Array(dn);
-  for (let i = 0; i < dn; i++) xd[i] = x[i * 2];
-
-  const { bands, centers } = bandEnergy(xd, fs / 2, 20, 950, 24);
-  let total = 1e-15;
-  for (let i = 0; i < bands.length; i++) total += bands[i];
-  let hf = 0;
-  for (let i = 0; i < bands.length; i++) if (centers[i] > 200) hf += bands[i];
-  hf /= total;
-
-  let ent = 0;
-  for (let i = 0; i < bands.length; i++) {
-    const p = bands[i] / total;
-    ent -= p * Math.log(p + 1e-15);
-  }
-  ent /= Math.log(bands.length);
-
-  // Bursts are detected on the HIGH-PASSED signal (see features.py).
-  const sm = movingAvg(x, 32);
-  const xh = new Float64Array(x.length);
-  for (let i = 0; i < x.length; i++) xh[i] = x[i] - sm[i];
-
-  const win = Math.max(4, Math.trunc(0.01 * fs));
-  const nfr = Math.floor(xh.length / win);
-  const e = new Float64Array(nfr);
-  for (let i = 0; i < nfr; i++) {
-    let s = 0;
-    for (let j = i * win; j < (i + 1) * win; j++) s += xh[j] * xh[j];
-    e[i] = s;
-  }
-  const floor = median(e) + 1e-12;
-  let bursts = 0, armed = true;
-  for (let i = 0; i < nfr; i++) {
-    if (e[i] > 6 * floor && armed) { bursts++; armed = false; }
-    else if (e[i] < 2.5 * floor) armed = true;
-  }
-  const seconds = x.length / fs;
-
-  let ms = 0;
-  for (let i = 0; i < x.length; i++) ms += x[i] * x[i];
-
-  return {
-    vag_hf_ratio: hf,
-    vag_burst_rate_hz: bursts / seconds,
-    vag_spec_entropy: ent,
-    vag_rms_x1000: Math.sqrt(ms / x.length) * 1000,
-    _bands: Array.from(bands),
-    _centers: Array.from(centers),
-  };
-}
 
 /* ---------------------------------------------------------------- join --- */
 
-export interface Session { walk: WalkSignal; sts: StsSignal; vag: { fs: number; mic: ArrayLike<number> }; }
+export interface Session { walk: WalkSignal; sts: StsSignal; }
 
 export function extract(session: Session, intake: Record<string, number>): Features {
-  const v = vagFeatures(session.vag);
-  const { _bands, _centers, ...vagOnly } = v;
-  const f: Features = { ...gaitFeatures(session.walk), ...stsFeatures(session.sts), ...vagOnly };
+  const f: Features = { ...gaitFeatures(session.walk), ...stsFeatures(session.sts) };
   for (const k of INTAKE_FEATURES) f[k] = Number(intake[k]);
   return f;
 }

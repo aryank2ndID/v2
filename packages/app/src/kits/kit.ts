@@ -210,7 +210,7 @@ export function createBleKit(name = "SANDHI-K1"): Kit {
     beginPhase: async (phase: Phase) => {
       currentPhase = phase;
       if (isStreamPhase(phase)) await writeCmd(CMD.START);
-      else if (phase === "vag") await writeCmd(CMD.AUDIO);
+      else if (phase === "vag") await writeCmd(CMD.STOP);
       return { durationMs: PHASE_DURATION_MS[phase] };
     },
 

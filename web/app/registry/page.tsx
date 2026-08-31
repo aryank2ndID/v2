@@ -193,8 +193,8 @@ function RecordDrawer({ record, onClose, model, district }: {
     return () => window.removeEventListener("keydown", esc);
   }, [onClose]);
 
-  const groups: ["gait" | "sts" | "acoustic" | "intake", string][] = [
-    ["intake", "Intake form"], ["gait", "Gait IMU"], ["sts", "Sit-to-stand"], ["acoustic", "Joint acoustic"],
+  const groups: ["gait" | "sts" | "intake", string][] = [
+    ["intake", "Intake form"], ["gait", "Gait IMU"], ["sts", "Sit-to-stand"]
   ];
   const maxAbs = Math.max(...top.map((e) => Math.abs(e.contribution)), 1e-6);
 

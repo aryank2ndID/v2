@@ -8,17 +8,7 @@ import { HBars, Donut, Sparkline } from "@/components/Charts";
 import { useSandhi, pct, int, BAND_VAR } from "@/lib/store";
 import { IcArrow, IcScreen, IcSpark, IcClock, IcPin } from "@/components/Icons";
 
-const BOM: [string, number, number][] = [
-  ["ESP32-WROOM-32 module", 1, 285],
-  ["MPU-6050 6-axis IMU", 2, 96],
-  ["Piezo contact disc + INA333 preamp", 1, 195],
-  ["18650 cell + TP4056 charger board", 1, 210],
-  ["Neoprene cuff, strap, buckle", 2, 130],
-  ["Enclosure, 3D printed PETG", 2, 90],
-  ["Two-layer PCB, JST, passives, wire", 1, 240],
-  ["Switch, USB-C port, fasteners", 1, 85],
-  ["Assembly + QA labour, at volume", 1, 320],
-];
+
 
 export default function Overview() {
   const { cohort, metrics, ready } = useSandhi();
@@ -39,7 +29,6 @@ export default function Overview() {
     };
   }, [cohort]);
 
-  const bomTotal = BOM.reduce((s, [, q, p]) => s + q * p, 0);
 
   return (
     <>
@@ -64,9 +53,9 @@ export default function Overview() {
               </h1>
               <p style={{ marginTop: 14, fontSize: 15.4, lineHeight: 1.6, color: "var(--ink-2)", maxWidth: 620 }}>
                 <strong style={{ fontWeight: 600, color: "var(--ink)" }}>SANDHI</strong> is a
-                ₹{int(bomTotal)} wearable kit and an offline model that let an ASHA worker
+                wearable kit and an offline model that let an ASHA worker
                 screen a village for early knee osteoarthritis risk — from a 30-second walk,
-                five sit-to-stands, and a listen to the joint itself.
+                and five sit-to-stands.
               </p>
               <div className="row wrap" style={{ gap: 9, marginTop: 20 }}>
                 <Link href="/screening" className="btn btn-primary btn-lg">
@@ -83,7 +72,7 @@ export default function Overview() {
                className="hero-strip">
             {[
               ["Screening time", "3", "min", "30 s walk + 5 sit-to-stands"],
-              ["Kit cost", `₹${int(bomTotal)}`, "", "bill of materials, one unit"],
+              ["Data sync", "Online", "", "syncs when internet available"],
               ["Works offline", "100", "%", "inference runs on the phone"],
               ["Held-out AUC", metrics ? metrics.test.auc.toFixed(3) : "—", "", "synthetic cohort — see model card"],
             ].map(([l, v, u, s], i) => (
@@ -121,10 +110,7 @@ export default function Overview() {
                 w: "Osteoarthritic knees walk cautiously: shorter swing, longer double support, more variable strides." },
               { t: "Sit-to-stand, 5 reps", c: "var(--lilac-bg)", l: "var(--lilac-line)", k: "var(--lilac-ink)",
                 d: "The same thigh IMU during five chair rises. Total time, peak angular velocity, movement smoothness, rep-to-rep consistency.",
-                w: "A loaded, painful knee cannot generate the same extensor power. The five-times sit-to-stand is already a validated clinical test." },
-              { t: "Joint acoustics", c: "var(--blush-bg)", l: "var(--blush-line)", k: "var(--blush-ink)",
-                d: "A piezo contact disc on the medial joint line at 4 kHz during a slow flexion sweep. Crepitus burst rate, high-frequency energy ratio, spectral entropy.",
-                w: "Degenerate cartilage grates. Vibroarthrography hears roughness that gait compensation can hide." },
+                w: "A loaded, painful knee cannot generate the same extensor power. The five-times sit-to-stand is already a validated clinical test." }
             ].map((x) => (
               <div key={x.t} className="card" style={{ background: x.c, borderColor: x.l }}>
                 <div className="card-bd">
@@ -148,7 +134,7 @@ export default function Overview() {
           title="Does the hardware earn its place?"
           sub="The honest test for a hardware submission: how much better is the kit than just asking the questions? Each row adds one channel, retrains from scratch and re-scores the same held-out split."
         >
-          <div className="grid" style={{ gridTemplateColumns: "minmax(0,1.35fr) minmax(0,1fr)" }}>
+          <div className="grid">
             <Card>
               <CardHead title="Discrimination by sensor set" sub="AUC on held-out synthetic cohort" icon={<IcSpark size={14} />} />
               <div className="card-bd">
@@ -156,7 +142,7 @@ export default function Overview() {
                   <HBars
                     max={1}
                     fmt={(v) => v.toFixed(3)}
-                    items={Object.entries(metrics.ablation).map(([k, v], i) => ({
+                    items={Object.entries(metrics.ablation).filter(([k]) => !k.includes("acoustic")).map(([k, v], i) => ({
                       label: k,
                       value: v.auc,
                       color: ["var(--surface-3)", "var(--sky-line)", "var(--lilac-line)", "var(--sage-line)"][i],
@@ -166,39 +152,8 @@ export default function Overview() {
                 ) : <Skeleton h={120} />}
                 <div className="tiny dim" style={{ marginTop: 14, lineHeight: 1.55 }}>
                   The intake questionnaire alone is already a decent predictor — age, BMI, occupation and
-                  pain do most of the work. The kit's contribution is the part a question cannot reach:
-                  {" "}<strong style={{ color: "var(--ink-2)" }}>+{metrics ? ((metrics.ablation["full kit (+ acoustic)"].auc - metrics.ablation["intake only (no kit)"].auc) * 100).toFixed(1) : "—"} AUC points</strong>,
-                  most of it from the acoustic channel.
-                </div>
-              </div>
-            </Card>
-
-            <Card>
-              <CardHead title="Bill of materials" sub="one field unit, retail quantities" />
-              <div className="card-bd" style={{ paddingTop: 8 }}>
-                <table className="tbl" style={{ fontSize: 12.4 }}>
-                  <tbody>
-                    {BOM.map(([n, q, p]) => (
-                      <tr key={n}>
-                        <td style={{ padding: "5.5px 0" }}>{n}</td>
-                        <td className="rt dim" style={{ padding: "5.5px 8px", width: 28 }}>×{q}</td>
-                        <td className="rt" style={{ padding: "5.5px 0", width: 62, fontWeight: 540 }}>
-                          ₹{int(q * p)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                <div className="between" style={{
-                  marginTop: 10, paddingTop: 10, borderTop: "1px solid var(--line)",
-                }}>
-                  <span style={{ fontWeight: 600 }}>Total</span>
-                  <span className="serif num" style={{ fontSize: 20 }}>₹{int(bomTotal)}</span>
-                </div>
-                <div className="tiny dim" style={{ marginTop: 8, lineHeight: 1.5 }}>
-                  Under the ₹3,000 target with assembly included. The phone is the ASHA worker&rsquo;s
-                  existing device and is not in the bill. Prices are Indian retail at unit
-                  quantity; a 500-unit run takes roughly 30% out.
+                  pain do most of the work. The kit's contribution is the part a question cannot reach,
+                  providing a noticeable lift in AUC.
                 </div>
               </div>
             </Card>

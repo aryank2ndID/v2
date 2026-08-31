@@ -16,7 +16,7 @@ import { int, num } from "@/lib/store";
 import { Rng, synthWalk } from "@/lib/dsp/simulator";
 import {
   encodeImuFrame, decodeImuFrame, hex, crc16, POWER_BUDGET,
-  SERVICE_UUID, CHAR_IMU, CHAR_ACOUSTIC, CHAR_CONTROL, SENSOR,
+  SERVICE_UUID, CHAR_IMU, CHAR_CONTROL, SENSOR,
 } from "@/lib/dsp/protocol";
 
 const BATTERY_MAH = 2600;
@@ -69,8 +69,6 @@ export default function KitConsole() {
       note: "self-test pass · bias 0.7 °/s" },
     { id: "IMU-S", part: "MPU-6050", where: "shin cuff", rate: "100 Hz", temp: 30.9, ok: true,
       note: "self-test pass · bias 1.1 °/s" },
-    { id: "MIC-J", part: "Piezo disc + INA333", where: "medial joint line", rate: "4 kHz", temp: 32.1, ok: true,
-      note: "coupling impedance nominal" },
   ];
 
   return (
@@ -213,7 +211,6 @@ export default function KitConsole() {
                 {[
                   ["Service", SERVICE_UUID, "primary"],
                   ["IMU stream", CHAR_IMU, "notify · 20 B"],
-                  ["Acoustic block", CHAR_ACOUSTIC, "notify · 185 B"],
                   ["Control", CHAR_CONTROL, "write · 4 B"],
                 ].map(([n, u, k]) => (
                   <div key={n}>
@@ -224,17 +221,6 @@ export default function KitConsole() {
                     <div className="mono dim" style={{ fontSize: 10.4, marginTop: 2 }}>{u}</div>
                   </div>
                 ))}
-                <div style={{
-                  marginTop: 4, padding: "9px 11px", borderRadius: "var(--r-sm)",
-                  background: "var(--surface-2)", border: "1px solid var(--line)",
-                }}>
-                  <div className="eyebrow" style={{ marginBottom: 4 }}>Why audio is not streamed</div>
-                  <div className="tiny dim" style={{ lineHeight: 1.55 }}>
-                    Six seconds at 4 kHz is 48 kB. That does not fit a notification budget
-                    already carrying two IMUs, so the sweep is buffered in PSRAM and shipped
-                    as a block afterwards over a negotiated 185-byte MTU — about 1.4 s.
-                  </div>
-                </div>
               </div>
             </Card>
           </div>

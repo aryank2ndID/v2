@@ -332,7 +332,7 @@ export default function SystemPage() {
                 referral decision is built and works — capture protocol, wire format, feature
                 extraction, a trained and calibrated model, on-device inference, an offline queue,
                 a sync server and a district view — and the only missing piece is the physical kit
-                and the real data to retrain on.</strong> That is a four-week gap with a known cost,
+                and the real data to retrain on.</strong> That is a four-week gap,
                 not a research problem.
               </p>
             </div>

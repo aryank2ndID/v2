@@ -72,7 +72,7 @@ export default function ModelCard() {
           <Stat label="Brier score" value={metrics.test.brier.toFixed(3)}
                 sub="lower is better — measures calibration, not just ranking" />
           <Stat label="Sensitivity at referral cut" value={pct(metrics.operating_points.refer.sensitivity, 1)}
-                sub="chosen deliberately high: a missed case costs more than an extra PHC visit" />
+                sub="chosen deliberately high to minimize missed cases" />
           <Stat label="NPV at the low cut" value={pct(metrics.operating_points.low.npv, 1)}
                 sub="a green result has to be genuinely reassuring" />
         </div>
@@ -116,7 +116,7 @@ export default function ModelCard() {
                 </div>
                 <div className="tiny dim" style={{ marginTop: 10, lineHeight: 1.55 }}>
                   The mass at the low end is the point of a screening tool: most
-                  people should be sorted out quickly and cheaply.
+                  people should be sorted out quickly.
                 </div>
               </div>
             </Card>
@@ -126,7 +126,7 @@ export default function ModelCard() {
         {/* ---------------------------------------- threshold explorer --- */}
         <Section
           title="Choosing the referral threshold"
-          sub="This is a policy decision, not a modelling one. Move the cut and watch what it costs the district in PHC visits and what it costs a patient in missed disease."
+          sub="This is a policy decision, not a modelling one. Move the cut and watch the impact on the district in PHC visits and missed disease."
         >
           <Card>
             <div className="card-bd">
@@ -255,9 +255,7 @@ export default function ModelCard() {
               </table>
               <div className="tiny dim" style={{ marginTop: 12, lineHeight: 1.55 }}>
                 This is the table that justifies building hardware at all. Note the honest caveat:
-                the acoustic channel dominates partly <em>because the simulator was written that way</em> —
-                crepitus is modelled as a more direct read of the joint surface than gait, which is a
-                defensible assumption but still an assumption. Real captures will move this table,
+                Real captures will move this table,
                 and that is exactly what the first pilot is for.
               </div>
             </div>
@@ -275,12 +273,12 @@ export default function ModelCard() {
                   value: r.gain,
                   color: {
                     gait: "var(--sky-line)", sts: "var(--lilac-line)",
-                    acoustic: "var(--blush-line)", intake: "var(--sage-line)",
+                    intake: "var(--sage-line)",
                   }[FEATURE_CHANNEL[r.feature] ?? "intake"],
                 }))}
               />
               <div className="row wrap" style={{ gap: 14, marginTop: 15, paddingTop: 12, borderTop: "1px solid var(--line-soft)" }}>
-                {(["gait", "sts", "acoustic", "intake"] as const).map((c) => (
+                {(["gait", "sts", "intake"] as const).map((c) => (
                   <span key={c} className={`chip ${CHANNEL_CHIP[c]}`}>{CHANNEL_LABEL[c]}</span>
                 ))}
               </div>

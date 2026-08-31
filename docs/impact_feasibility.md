@@ -11,14 +11,14 @@ Our solution stands out from traditional diagnostic approaches and existing digi
     *   Works completely without internet, ensuring viability in remote, hilly terrains of the North East.
     *   Designed for local healthcare workers (ASHA workers) with multi-lingual support (English, Hindi, Assamese).
     *   Accounts for regional lifestyle factors (e.g., occupational hazards in tea plantations and agriculture).
-3.  **Ultra-Low-Cost Portability**: Eliminates the need for expensive gait laboratories or heavy X-Ray machinery. The entire diagnostic toolkit fits in a pocket (a standard smartphone + a $5 ESP32-based wearable sensor).
+3.  **Ultra-Portable**: Eliminates the need for expensive gait laboratories or heavy X-Ray machinery. The entire diagnostic toolkit fits in a pocket (a standard smartphone + an ESP32-based wearable sensor).
 
 ## 2. Impact & Benefits
 
 The deployment of this system in rural health camps carries significant socio-economic and clinical impact:
 
 *   **Proactive vs. Reactive Care**: Identifies risk markers *before* irreversible cartilage damage occurs, shifting the paradigm from late-stage joint replacement surgeries to early physiotherapy and lifestyle intervention.
-*   **Mass Screening Scalability**: A single healthcare worker can screen dozens of individuals in a day at a rural camp with zero recurring consumable costs.
+*   **Mass Screening Scalability**: A single healthcare worker can screen dozens of individuals in a day at a rural camp with zero recurring consumables.
 *   **Economic Relief**: By catching OA early, rural populations avoid the catastrophic financial burden of advanced orthopedic surgeries and prolonged loss of livelihood (especially critical for daily wage agricultural workers).
 *   **Data-Driven Public Health**: The sync-when-online feature allows central health authorities to map OA prevalence hotspots across the NER, enabling targeted resource allocation.
 

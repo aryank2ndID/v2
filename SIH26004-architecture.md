@@ -1,7 +1,7 @@
 # SIH26004 — AI-Assisted Early Detection of Osteoarthritis Risk Markers (NER)
 
 > **Ministry:** MDoNER · **Track:** Hardware · **Theme:** Space Technology (as listed)
-> **One-line pitch:** A ₹3,000 field kit + offline AI that lets an ASHA worker screen a village for early knee OA in 3 minutes — no doctor, no X-ray, no internet.
+> **One-line pitch:** A field kit + offline AI that lets an ASHA worker screen a village for early knee OA in 3 minutes — no doctor, no X-ray, no internet.
 
 ---
 
@@ -9,7 +9,7 @@
 
 ```mermaid
 flowchart LR
-    A["🚶 Patient<br/>30s walk + 5 sit-stands"] --> B["📟 Wearable Kit<br/>ESP32 + IMUs + mic"]
+    A["🚶 Patient<br/>30s walk + 5 sit-stands"] --> B["📟 Wearable Kit<br/>ESP32 + IMUs"]
     B -->|BLE| C["📱 ASHA Phone App<br/>offline-first"]
     C --> D["🧠 On-device Model<br/>TFLite risk score"]
     D --> E["🟢🟡🔴 Risk Band<br/>+ referral advice"]
@@ -40,11 +40,9 @@ flowchart TB
         direction LR
         S1["IMU — thigh<br/>MPU6050 / BNO055"]
         S2["IMU — shin"]
-        S3["Piezo contact mic<br/>joint crepitus"]
         MCU["ESP32<br/>sampling + BLE"]
         S1 --> MCU
         S2 --> MCU
-        S3 --> MCU
     end
 
     subgraph L2["② MOBILE APP — Flutter"]
@@ -58,7 +56,7 @@ flowchart TB
         INF --> QUE
     end
 
-    subgraph L3["③ BACKEND — Go, single binary"]
+    subgraph L3["③ BACKEND — Python / FastAPI"]
         direction LR
         API["Sync / Ingest API"]
         REG["Patient registry"]
@@ -72,7 +70,7 @@ flowchart TB
 
     subgraph L4["④ ML SERVICE — Python / FastAPI"]
         direction LR
-        FE["Feature extraction<br/>gait + audio"]
+        FE["Feature extraction<br/>gait"]
         TAB["XGBoost<br/>tabular risk"]
         CNN["CNN — KL grade<br/>optional, X-ray at PHC"]
         EXP["Export → TFLite"]
@@ -99,7 +97,7 @@ flowchart TB
     classDef ml fill:#F3EFFA,stroke:#A99BD1,stroke-width:2px,color:#3F3557
     classDef dash fill:#FDF0F5,stroke:#E8A0BF,stroke-width:2px,color:#5A3E4D
 
-    class S1,S2,S3,MCU edge
+    class S1,S2,MCU edge
     class CAP,FORM,INF,QUE mob
     class API,REG,REF,PG,OBJ back
     class FE,TAB,CNN,EXP ml
@@ -130,7 +128,7 @@ sequenceDiagram
     A->>P: Strap kit above + below knee
     A->>K: Start session
     P->>K: 30s walk + 5 sit-to-stands
-    K-->>M: Stream IMU + audio over BLE
+    K-->>M: Stream IMU over BLE
     M->>M: Extract features → TFLite → risk score
     M-->>A: 🟢 Low / 🟡 Watch / 🔴 Refer to PHC
     A->>P: Explain result + exercise advice
@@ -146,9 +144,9 @@ sequenceDiagram
 | Layer | Choice | Why |
 |---|---|---|
 | **Firmware** | ESP32 + Arduino/ESP-IDF, BLE | Cheap, BLE built in, huge sensor library support |
-| **Sensors** | 2× IMU (MPU6050 or BNO055), piezo contact mic | Gait + knee angle + crepitus, all under budget |
+| **Sensors** | 2× IMU (MPU6050 or BNO055) | Gait + knee angle |
 | **App** | Flutter + SQLite + `flutter_blue_plus` + `tflite_flutter` | One codebase, real offline story, on-device inference |
-| **Backend** | **Go** — single binary, `net/http` + `pgx` | Boring, fast, deploys anywhere. **No Kafka, no microservices** |
+| **Backend** | **Python** — FastAPI | Compatibility with ML models, quick iteration |
 | **DB** | PostgreSQL + MinIO/S3 | Records in PG, raw signal blobs in object store |
 | **ML** | Python, FastAPI, XGBoost (+ optional CNN), export TFLite | Tabular model does the heavy lifting; CNN is a bonus |
 | **Dashboard** | Next.js + Tailwind + Recharts + MapLibre | Fast to build, looks good on stage |
@@ -163,7 +161,7 @@ flowchart LR
     W1["① Signal spec<br/>+ synthetic data gen"] --> W2["② Firmware<br/>capture + BLE"]
     W2 --> W3["③ Flutter app<br/>BLE + intake + outbox"]
     W3 --> W4["④ Risk model<br/>features → XGBoost → TFLite"]
-    W4 --> W5["⑤ Go sync API<br/>+ Postgres"]
+    W4 --> W5["⑤ Python sync API<br/>+ Postgres"]
     W5 --> W6["⑥ Dashboard<br/>+ demo polish"]
 
     classDef hard fill:#FFF4E6,stroke:#E8B872,stroke-width:2px,color:#5A4527
@@ -185,7 +183,7 @@ The synthetic data generator in step ① is what lets the app and model team sta
 | ✅ Do | ❌ Don't |
 |---|---|
 | Say **"screening / triage, not diagnosis"** everywhere | Claim you diagnose osteoarthritis |
-| Show a BOM table, target **under ~₹3,000** | Hand-wave the cost |
+| Show a clear architecture | Pending details |
 | Demo with **airplane mode on** | Depend on venue wifi |
 | Local-language UI (Assamese / Khasi / Mizo) | Generic English-only app |
 | Cite OAI dataset + real NER prevalence numbers | Invent accuracy figures |
@@ -196,7 +194,6 @@ The synthetic data generator in step ① is what lets the app and model team sta
 
 ## 7. Open Decisions
 
-- **Piezo mic in v1 or cut it?** Adds novelty and a second signal, but adds noise-handling work. Decide in week 1 after the first capture test.
 - **X-ray CNN — in or out?** Only include if you can show it running on a PHC's existing X-ray. Otherwise it's dead weight.
 - **Who owns firmware?** This is the single-point-of-failure role. Assign it before anything else.
 

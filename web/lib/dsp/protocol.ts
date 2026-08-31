@@ -19,24 +19,18 @@
  *                gyro   ±2000 dps -> 16.384 LSB/(deg/s)
  *   bytes 16-17  flags: bit0 saturation, bit1 cuff-slip suspected, bit2 low batt
  *   bytes 18-19  CRC-16/CCITT-FALSE over bytes 0..17
- *
- * Audio is not streamed live. 6 s at 4 kHz is 48 kB, which does not fit a
- * 100 Hz notification budget alongside two IMUs, so the ESP32 buffers the
- * flexion sweep in PSRAM and ships it as a block afterwards over a negotiated
- * 185-byte MTU. The capture is 6 s; the transfer is about 1.4 s.
  */
 
 export const SERVICE_UUID = "6e5a0001-b5a3-f393-e0a9-e50e24dcca9e";
 export const CHAR_IMU = "6e5a0002-b5a3-f393-e0a9-e50e24dcca9e";
-export const CHAR_ACOUSTIC = "6e5a0003-b5a3-f393-e0a9-e50e24dcca9e";
 export const CHAR_CONTROL = "6e5a0004-b5a3-f393-e0a9-e50e24dcca9e";
 
 export const IMU_FRAME_BYTES = 20;
 export const ACCEL_LSB_PER_G = 8192;      // ±4 g on a 16-bit signed word
 export const GYRO_LSB_PER_DPS = 16.384;   // ±2000 dps
 
-export const FRAME_TYPE = { imu: 0x1, acoustic: 0x2, status: 0x3 } as const;
-export const SENSOR = { thigh: 0x1, shank: 0x2, mic: 0x3 } as const;
+export const FRAME_TYPE = { imu: 0x1, status: 0x3 } as const;
+export const SENSOR = { thigh: 0x1, shank: 0x2 } as const;
 
 /** CRC-16/CCITT-FALSE. poly 0x1021, init 0xFFFF, no reflection, no xorout. */
 export function crc16(bytes: Uint8Array, len = bytes.length): number {
@@ -104,6 +98,5 @@ export const POWER_BUDGET = [
   { part: "ESP32 — BLE advertising, idle", ma: 22, duty: "between sessions" },
   { part: "ESP32 — BLE connected, streaming", ma: 108, duty: "during capture" },
   { part: "MPU-6050 ×2 — gyro + accel active", ma: 7.6, duty: "during capture" },
-  { part: "Piezo front end (INA333 + bias)", ma: 1.4, duty: "during capture" },
   { part: "Regulator quiescent + LED", ma: 3.2, duty: "always" },
 ];

@@ -21,12 +21,12 @@ import {
   useSandhi, pct, int, BAND_LABEL, BAND_VAR, BAND_BG, formatFeature,
   FEATURE_LABEL, FEATURE_UNIT, CHANNEL_LABEL, CHANNEL_CHIP,
 } from "@/lib/store";
-import { Rng, OCCUPATIONS, synthWalk, synthSts, synthVag, type Nuisance } from "@/lib/dsp/simulator";
-import { extract, toVector, gaitFeatures, stsFeatures, vagFeatures } from "@/lib/dsp/features";
+import { Rng, OCCUPATIONS, synthWalk, synthSts, type Nuisance } from "@/lib/dsp/simulator";
+import { extract, toVector, gaitFeatures, stsFeatures } from "@/lib/dsp/features";
 import { predict, bandOf, explain, contributions } from "@/lib/model/runtime";
 
 type Step = "intake" | "fit" | "capture" | "result";
-type Phase = "idle" | "walk" | "sts" | "vag" | "infer" | "done";
+type Phase = "idle" | "walk" | "sts" | "infer" | "done";
 
 const DISTRICT_FALLBACK = { id: "ML-EKH", name: "East Khasi Hills", terrain: 0.82 };
 
@@ -102,14 +102,13 @@ export default function Screening() {
     return {
       walk: synthWalk(rng, sevFunc, nz),
       sts: synthSts(rng, sevFunc, nz),
-      vag: synthVag(rng, sevVag, Math.min(1.9, Math.max(0.3, rng.normal(1, 0.3)))),
       nz,
     };
   }, [runId, intake.age, intake.sex_f, bmi, intake.occIdx, intake.prior_injury,
       intake.family_hx, presetSev, terrain, occ.squat, occ.stairs]);
 
   const stsSeconds = session.sts.thigh_gyro.length / 100;
-  const DUR: Record<string, number> = { walk: 30, sts: stsSeconds, vag: 6 };
+  const DUR: Record<string, number> = { walk: 30, sts: stsSeconds };
 
   React.useEffect(() => {
     if (phase === "idle" || phase === "done" || phase === "infer") return;
@@ -118,7 +117,7 @@ export default function Screening() {
         const next = prev + 0.05 * speed;
         setPackets((p) => p + Math.round(5 * speed));
         if (next >= DUR[phase]) {
-          setPhase((ph) => (ph === "walk" ? "sts" : ph === "sts" ? "vag" : "infer"));
+          setPhase((ph) => (ph === "walk" ? "sts" : "infer"));
           return 0;
         }
         return next;
@@ -137,7 +136,7 @@ export default function Screening() {
     const id = setTimeout(() => {
       const t0 = performance.now();
       const f = extract(
-        { walk: session.walk, sts: session.sts, vag: session.vag },
+        { walk: session.walk, sts: session.sts },
         {
           age: intake.age, sex_f: intake.sex_f, bmi,
           occ_squat_load: occ.squat, stairs_per_day: occ.stairs,
@@ -158,12 +157,6 @@ export default function Screening() {
   }, [phase, model]);
 
   const sampleIdx = Math.floor(t * 100);
-  const micIdx = Math.floor(t * 4000);
-  const liveVag = React.useMemo(() => {
-    if (phase !== "vag" && phase !== "infer" && phase !== "done") return null;
-    const end = phase === "vag" ? Math.max(2000, micIdx) : session.vag.mic.length;
-    return vagFeatures({ fs: 4000, mic: session.vag.mic.subarray(0, end) });
-  }, [phase, Math.floor(micIdx / 2000), session]);
 
   const reset = () => {
     setStep("intake"); setPhase("idle"); setT(0); setPackets(0);
@@ -182,9 +175,9 @@ export default function Screening() {
     setQueued(true);
   };
 
-  const totalSeconds = 30 + stsSeconds + 6;
+  const totalSeconds = 30 + stsSeconds;
   const elapsed = phase === "walk" ? t : phase === "sts" ? 30 + t
-    : phase === "vag" ? 30 + stsSeconds + t : phase === "idle" ? 0 : totalSeconds;
+    : phase === "idle" ? 0 : totalSeconds;
 
   const walkUpto = phase === "walk" ? sampleIdx : phase === "idle" ? 0 : 3000;
 
@@ -286,23 +279,7 @@ export default function Screening() {
                          data={session.sts.thigh_gyro.subarray(0,
                            phase === "sts" ? sampleIdx : (phase === "idle" || phase === "walk") ? 0 : session.sts.thigh_gyro.length)}
                          color="var(--lilac-ink)" fill="var(--lilac-bg)" />
-                  <Scope label="Joint microphone · piezo" unit="mV" height={58} window={900}
-                         live={phase === "vag"}
-                         data={session.vag.mic.subarray(0,
-                           phase === "vag" ? micIdx : (phase === "idle" || phase === "walk" || phase === "sts") ? 0 : session.vag.mic.length)}
-                         color="var(--blush-ink)" fill="var(--blush-bg)" />
                 </div>
-                {liveVag && (
-                  <div>
-                    <div className="between" style={{ marginBottom: 6 }}>
-                      <span className="eyebrow">Joint spectrum · 24 bands</span>
-                      <span className="tiny dim num">
-                        HF ratio {liveVag.vag_hf_ratio.toFixed(3)} · bursts {liveVag.vag_burst_rate_hz.toFixed(2)} Hz
-                      </span>
-                    </div>
-                    <SpectrumStrip bands={liveVag._bands} centers={liveVag._centers} />
-                  </div>
-                )}
               </div>
             </Card>
 
@@ -331,7 +308,7 @@ function MiniStat({ label, value, sub, tone }: { label: string; value: React.Rea
 /** Features as they become computable — proof this is not a video. */
 function LiveFeatures({ phase, session, sampleIdx, result }: {
   phase: Phase;
-  session: { walk: any; sts: any; vag: any };
+  session: { walk: any; sts: any };
   sampleIdx: number;
   result: { features: Record<string, number> } | null;
 }) {
@@ -364,7 +341,6 @@ function LiveFeatures({ phase, session, sampleIdx, result }: {
     ["gait", ["cadence_spm", "gait_speed_est_mps", "stance_pct", "double_support_pct",
               "knee_flex_rom_deg", "stride_time_cv_pct", "step_asym_pct", "shank_swing_peak_dps"]],
     ["sts", ["sts_total_s", "sts_peak_angvel_dps", "sts_smoothness_ldlj", "sts_rep_cv_pct"]],
-    ["acoustic", ["vag_burst_rate_hz", "vag_hf_ratio", "vag_spec_entropy", "vag_rms_x1000"]],
   ];
 
   return (
@@ -685,7 +661,6 @@ function CaptureScreen({ phase, t, elapsed, totalSeconds, stsSeconds }: {
   const stages = [
     { k: "walk", t: "Walk normally", d: "30 seconds, flat ground, usual pace", n: 30 },
     { k: "sts", t: "Sit and stand ×5", d: "arms crossed, as fast as is comfortable", n: stsSeconds },
-    { k: "vag", t: "Slow bend and straighten", d: "seated, three slow cycles, stay quiet", n: 6 },
   ];
   const active = stages.findIndex((s) => s.k === phase);
   return (

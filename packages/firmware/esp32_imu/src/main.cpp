@@ -36,8 +36,7 @@
 #endif
 
 static constexpr uint32_t kSamplePeriodUs = 10000;    // 100 Hz per IMU
-static constexpr uint32_t kAudioPeriodUs = 250;       // 4 kHz
-static constexpr size_t kAudioSamples = 24000;        // 6 s
+// audio constants removed
 static constexpr uint32_t kCalibSamples = 512;
 static constexpr uint16_t kBatteryLowMv = 3300;
 static constexpr float kBatteryDivider = 2.0f;
@@ -46,8 +45,6 @@ static constexpr float kBatteryDivider = 2.0f;
 enum {
   MODE_IDLE = 0,
   MODE_IMU = 1,
-  MODE_AUDIO_REC = 2,
-  MODE_AUDIO_SHIP = 3,
 };
 
 enum {
@@ -55,7 +52,6 @@ enum {
   CMD_STOP = 0x02,
   CMD_CALIBRATE = 0x03,
   CMD_STATUS = 0x04,
-  CMD_AUDIO = 0x05,
 };
 
 // ----------------------------------------------------------------- sensors ---
@@ -73,7 +69,6 @@ float gGyroScale = SANDHI_GYRO_LSB_PER_DPS * 57.29578f;  // rad/s -> LSB
 BLEServer *gServer = nullptr;
 BLEService *gService = nullptr;
 BLECharacteristic *gCharImu = nullptr;
-BLECharacteristic *gCharAcoustic = nullptr;
 BLECharacteristic *gCharControl = nullptr;
 
 bool gConnected = false;
@@ -87,10 +82,6 @@ int64_t gBattNextUs = 0;
 
 uint8_t gSeqThigh = 0;
 uint8_t gSeqShank = 0;
-
-int16_t *gAudioBuf = nullptr;
-size_t gAudioIdx = 0;
-int64_t gAudioNextUs = 0;
 
 uint8_t gImuSeqT = 0;
 uint8_t gImuSeqS = 0;
@@ -209,27 +200,6 @@ static void sampleImus() {
   }
 }
 
-// -------------------------------------------------------------- audio ship ---
-
-static void shipAudio() {
-  static constexpr size_t per = SANDHI_ACOUSTIC_SAMPLES_PER_BLOCK;
-  size_t done = 0;
-  uint16_t index = 0;
-  while (done < gAudioIdx) {
-    size_t n = gAudioIdx - done;
-    bool last = n <= per;
-    size_t take = last ? n : per;
-    uint8_t block[SANDHI_ACOUSTIC_BLOCK_BYTES];
-    sandhiWriteAcousticBlock(index, last, 4, gAudioBuf + done, take, block);
-    gCharAcoustic->setValue((uint8_t *)block, SANDHI_ACOUSTIC_BLOCK_BYTES);
-    gCharAcoustic->notify();
-    done += take;
-    index++;
-    delay(2);
-  }
-  gAudioIdx = 0;
-}
-
 // ------------------------------------------------------ mode state machine ---
 
 static void enterIdle() { gMode = MODE_IDLE; }
@@ -238,23 +208,6 @@ static void enterImu() {
   gSeqThigh = 0;
   gSeqShank = 0;
   gMode = MODE_IMU;
-}
-
-static void enterAudioRec() {
-  if (!gAudioBuf) return;
-  memset(gAudioBuf, 0, kAudioSamples * sizeof(int16_t));
-  gAudioIdx = 0;
-  gAudioNextUs = esp_timer_get_time();
-  gMode = MODE_AUDIO_REC;
-}
-
-static void sampleAudio() {
-  int64_t now = esp_timer_get_time();
-  if (now < gAudioNextUs) return;
-  gAudioNextUs += kAudioPeriodUs;
-  int raw = analogRead(PIN_MIC);
-  gAudioBuf[gAudioIdx++] = (int16_t)(((int32_t)raw - 2048) << 4);
-  if (gAudioIdx >= kAudioSamples) gMode = MODE_AUDIO_SHIP;
 }
 
 // ---------------------------------------------------------- BLE callbacks ----
@@ -327,9 +280,6 @@ void setup() {
   analogReadResolution(12);
   readBatteryOnce();
 
-  gAudioBuf = (int16_t *)malloc(kAudioSamples * sizeof(int16_t));
-  if (!gAudioBuf) Serial.println("SANDHI: audio buffer alloc failed");
-
   BLEDevice::init("SANDHI-K1");
   BLEDevice::setMTU(517);
 
@@ -339,8 +289,6 @@ void setup() {
 
   gCharImu = gService->createCharacteristic(
       SANDHI_CHAR_IMU, BLECharacteristic::PROPERTY_NOTIFY);
-  gCharAcoustic = gService->createCharacteristic(
-      SANDHI_CHAR_ACOUSTIC, BLECharacteristic::PROPERTY_NOTIFY);
   gCharControl = gService->createCharacteristic(
       SANDHI_CHAR_CONTROL,
       BLECharacteristic::PROPERTY_WRITE | BLECharacteristic::PROPERTY_WRITE_NR);
@@ -372,9 +320,6 @@ void handleCommand(uint8_t cmd) {
     case CMD_STATUS:
       sendStatus();
       break;
-    case CMD_AUDIO:
-      if (gConnected) enterAudioRec();
-      break;
     default:
       break;
   }
@@ -402,13 +347,6 @@ void loop() {
       digitalWrite(PIN_LED, !digitalRead(PIN_LED));
       break;
     }
-    case MODE_AUDIO_REC:
-      sampleAudio();
-      break;
-    case MODE_AUDIO_SHIP:
-      shipAudio();
-      enterIdle();
-      break;
     default:
       delay(10);
       break;

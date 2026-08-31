@@ -6,7 +6,7 @@
  *   Service           6e5a0001-b5a3-f393-e0a9-e50e24dcca9e
  *     0x0002  notify  IMU stream        20-byte frames, 100 Hz per sensor
  *     0x0003  notify  Acoustic block    185-byte frames, burst after capture
- *     0x0004  write   Control           start / stop / calibrate / status / audio
+ *     0x0004  write   Control           start / stop / calibrate / status
  *
  * IMU frame (20 bytes, fits the default BLE 4.2 ATT payload):
  *   byte  0      type (upper nibble) | sensor id (lower nibble)
@@ -51,7 +51,6 @@ export const CMD = {
   STOP: 0x02,
   CALIBRATE: 0x03,
   STATUS: 0x04,
-  AUDIO: 0x05,
 } as const;
 
 export const FLAG = {

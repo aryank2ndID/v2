@@ -190,8 +190,6 @@ export const FEATURE_LABEL: Record<string, string> = {
   sts_total_s: "5× sit-to-stand time", sts_mean_rep_s: "Time per stand",
   sts_peak_angvel_dps: "Stand-up peak velocity", sts_smoothness_ldlj: "Movement smoothness",
   sts_rep_cv_pct: "Rep-to-rep variability", sts_trunk_lean_dps: "Trunk lean rate",
-  vag_hf_ratio: "Joint high-frequency energy", vag_burst_rate_hz: "Crepitus burst rate",
-  vag_spec_entropy: "Joint spectral entropy", vag_rms_x1000: "Joint signal level",
   age: "Age", sex_f: "Female", bmi: "BMI", occ_squat_load: "Occupational squat load",
   stairs_per_day: "Stairs / slopes per day", terrain_slope_idx: "Terrain slope",
   prior_injury: "Prior knee injury", family_hx: "Family history",
@@ -204,8 +202,7 @@ export const FEATURE_UNIT: Record<string, string> = {
   shank_swing_peak_dps: "°/s", heelstrike_impact_g: "g", step_asym_pct: "%",
   gait_speed_est_mps: "m/s", sts_total_s: "s", sts_mean_rep_s: "s",
   sts_peak_angvel_dps: "°/s", sts_smoothness_ldlj: "LDLJ", sts_rep_cv_pct: "%",
-  sts_trunk_lean_dps: "°/s", vag_hf_ratio: "", vag_burst_rate_hz: "Hz",
-  vag_spec_entropy: "", vag_rms_x1000: "mV", age: "yr", sex_f: "", bmi: "kg/m²",
+  sts_trunk_lean_dps: "°/s", age: "yr", sex_f: "", bmi: "kg/m²",
   occ_squat_load: "/3", stairs_per_day: "", terrain_slope_idx: "", prior_injury: "",
   family_hx: "", womac_pain: "/20", womac_stiff: "/8",
 };
@@ -221,8 +218,8 @@ export function formatFeature(k: string, v: number) {
 }
 
 export const CHANNEL_LABEL: Record<string, string> = {
-  gait: "Gait IMU", sts: "Sit-to-stand", acoustic: "Joint acoustic", intake: "Intake form",
+  gait: "Gait IMU", sts: "Sit-to-stand", intake: "Intake form",
 };
 export const CHANNEL_CHIP: Record<string, string> = {
-  gait: "chip-sky", sts: "chip-lilac", acoustic: "chip-blush", intake: "chip-sage",
+  gait: "chip-sky", sts: "chip-lilac", intake: "chip-sage",
 };
