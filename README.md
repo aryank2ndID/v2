@@ -78,6 +78,3 @@ The `scripts/` directory contains tools for generating synthetic clinical datase
 - `make_cohort.py`: Generates a synthetic dataset of patient profiles and simulated kinematics.
 - `train_risk_model.py`: Trains the initial offline risk evaluation model.
 - `demo_end_to_end.py`: Runs a full simulation of the data pipeline.
-
-## 🤝 Contribution Guidelines
-When contributing to this repository, ensure that all changes maintain the offline-first capabilities of the system. All AI models must be capable of inferencing on edge devices or standard mobile hardware.
