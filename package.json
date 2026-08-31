@@ -4,6 +4,7 @@
   "private": true,
   "description": "SIH26004 — AI-assisted early detection of osteoarthritis risk markers for the North-Eastern Region",
   "scripts": {
+    "postinstall": "cd web && npm install",
     "train": "cd ml && python3 train.py --n 20000",
     "sync-artifacts": "cp ml/out/model.json ml/out/metrics.json ml/out/cohort.json web/public/data/ && cp data/districts.json web/public/data/",
     "parity": "cd web && npx tsc -p tsconfig.parity.json && printf '{\"type\":\"module\"}' > .parity/package.json && cd .. && node tools/parity_check.mjs",
