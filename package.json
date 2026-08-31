@@ -10,7 +10,7 @@
     "parity": "cd web && npx tsc -p tsconfig.parity.json && printf '{\"type\":\"module\"}' > .parity/package.json && cd .. && node tools/parity_check.mjs",
     "dev": "cd web && npm run dev",
     "build": "cd web && npm install && npm run build",
-    "server": "cd server && go run .",
+    "server": "cd packages/api && uvicorn oa_api.main:app --port 8787",
     "verify": "npm run train && npm run parity && npm run sync-artifacts"
   }
 }
