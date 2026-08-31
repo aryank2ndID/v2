@@ -24,3 +24,4 @@ packages/app/.parity/
 server/server
 web/.next/
 web/out/
+*.log
