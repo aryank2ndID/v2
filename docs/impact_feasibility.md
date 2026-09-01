@@ -13,16 +13,37 @@ Our solution stands out from traditional diagnostic approaches and existing digi
     *   Accounts for regional lifestyle factors (e.g., occupational hazards in tea plantations and agriculture).
 3.  **Ultra-Portable**: Eliminates the need for expensive gait laboratories or heavy X-Ray machinery. The entire diagnostic toolkit fits in a pocket (a standard smartphone + an ESP32-based wearable sensor).
 
-## 2. Impact & Benefits
+## 2. Key System Benefits
 
-The deployment of this system in rural health camps carries significant socio-economic and clinical impact:
+> **Conceptual Delineation (Benefits vs. Impact):**
+> * **Benefits** represent immediate, direct, and tangible advantages delivered to specific micro-level stakeholders (patients, ASHA workers, health facilities, and local communities). These are explicitly grouped into **Social & Community**, **Economic**, and **Clinical & Operational** benefits.
+> * **Systemic Impact** represents long-term, macro-level transformational changes produced across the overall public health ecosystem and policy landscape.
 
-*   **Proactive vs. Reactive Care**: Identifies risk markers *before* irreversible cartilage damage occurs, shifting the paradigm from late-stage joint replacement surgeries to early physiotherapy and lifestyle intervention.
-*   **Mass Screening Scalability**: A single healthcare worker can screen dozens of individuals in a day at a rural camp with zero recurring consumables.
-*   **Economic Relief**: By catching OA early, rural populations avoid the catastrophic financial burden of advanced orthopedic surgeries and prolonged loss of livelihood (especially critical for daily wage agricultural workers).
-*   **Data-Driven Public Health**: The sync-when-online feature allows central health authorities to map OA prevalence hotspots across the NER, enabling targeted resource allocation.
+### A. Social & Community Benefits
+*   **Empowerment of Last-Mile Healthcare Workers**: Equips local ASHA workers and community health officers with non-invasive, objective digital tools, elevating community trust and capability.
+*   **Preservation of Elder Mobility & Dignity**: Catches joint deterioration before severe impairment occurs, enabling rural & tribal elders in the NER to remain active, independent, and involved in family life.
+*   **Reduction of Caregiver Burden**: Minimizes severe motor disability in agricultural households, significantly easing the physical, emotional, and temporal demands placed on family caregivers.
+*   **Regional Health Equity**: Brings specialized diagnostic assistance directly to underserved hill villages and tea garden communities.
 
-## 3. Implementation Feasibility
+### B. Economic Benefits
+*   **Livelihood & Income Protection**: Daily wage earners, tea plantation workers, and terrace farmers avoid chronic work absenteeism, income disruption, and long-term poverty traps caused by severe joint disability.
+*   **Avoidance of Catastrophic Healthcare Costs**: Early conservative management prevents expensive late-stage interventions (such as joint replacement surgeries costing ₹2.5L–₹5L+), costly diagnostic imaging (MRI/CT), and frequent long-distance travel to urban tertiary hospitals.
+*   **Public Health Resource Efficiency**: Mass screening requires zero recurring consumables, allowing government health programs to screen thousands of citizens at negligible marginal cost.
+
+### C. Clinical & Operational Benefits
+*   **Early Risk Stratification**: Detects early functional impairments (KL Grade 0–1 risk markers) before irreversible structural cartilage loss occurs, shifting care to low-cost interventions (physiotherapy, posture adjustment, weight management).
+*   **100% Offline Edge Resilience**: Performs complete sensor signal processing and AI risk inference locally on basic smartphones without requiring mobile network coverage.
+*   **Standardized Objective Metrics**: Replaces subjective visual assessment with quantitative biomechanical measurements (gait stance/swing ratios, sit-to-stand Jerk smoothness, excursion angles).
+
+## 3. High-Level Systemic Impact
+
+Impact refers to the long-term, macro-level transformational changes produced across the healthcare ecosystem:
+
+*   **Preventative Public Health Paradigm Shift**: Shifts the regional orthopedics strategy from reactive treatment of late-stage joint destruction to proactive, community-wide early prevention.
+*   **District-Level Epidemiological Hotspot Mapping**: Secure background sync enables central health authorities (MDoNER, State Health Missions) to visualize OA prevalence heatmaps across NER districts, enabling data-driven deployment of physiotherapists and medical resources.
+*   **Democratization of Orthopedic Triage**: Decouples early musculoskeletal screening from capital-intensive urban tertiary centers, establishing an scalable, last-mile health architecture for the entire North Eastern Region.
+
+## 4. Implementation Feasibility
 
 The project is highly feasible from both a technical and operational standpoint:
 

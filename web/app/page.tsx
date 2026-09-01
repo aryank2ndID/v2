@@ -206,6 +206,84 @@ export default function Overview() {
           ) : <div className="grid g4">{[0,1,2,3].map(i => <Skeleton key={i} />)}</div>}
         </Section>
 
+        {/* --------------------------------------------- benefits & impact -- */}
+        <Section
+          title="Direct Benefits vs. High-Level Systemic Impact"
+          sub="Clear distinction between direct, tangible benefits for local stakeholders and long-term systemic impact for public health leadership."
+        >
+          <div style={{ padding: "12px 16px", borderRadius: 8, background: "var(--surface-2)", border: "1px solid var(--line-soft)", marginBottom: 16, fontSize: 13, color: "var(--ink-2)" }}>
+            <strong style={{ color: "var(--ink)" }}>Conceptual Delineation:</strong> <strong>Benefits</strong> represent direct, tangible outcomes for immediate stakeholders categorized into <em>Social & Community</em>, <em>Economic</em>, and <em>Clinical & Operational</em> subgroups. <strong>Systemic Impact</strong> represents macro-level, long-term transformational changes for the broader public healthcare ecosystem.
+          </div>
+
+          <div className="grid g2" style={{ gap: 16 }}>
+            {/* Direct Benefits Card */}
+            <Card>
+              <CardHead title="Direct Stakeholder Benefits" sub="Immediate, practical value categorized by Social, Economic, and Clinical subgroups" />
+              <div className="card-bd stack" style={{ gap: 16 }}>
+                <div style={{ padding: "12px 14px", borderRadius: 8, background: "var(--surface-2)", border: "1px solid var(--line-soft)" }}>
+                  <div className="row" style={{ gap: 8, marginBottom: 4 }}>
+                    <Chip tone="chip-sky">Social & Community Benefits</Chip>
+                  </div>
+                  <ul style={{ paddingLeft: 18, fontSize: 13, lineHeight: 1.5, color: "var(--ink-2)", margin: 0 }}>
+                    <li><strong>Empowerment of ASHA Workers</strong>: Equips local workers with non-invasive digital screening capability.</li>
+                    <li><strong>Mobility Preservation</strong>: Keeps rural elders independent and active in community life.</li>
+                    <li><strong>Reduced Caregiver Burden</strong>: Minimizes severe motor disability in agricultural households.</li>
+                  </ul>
+                </div>
+
+                <div style={{ padding: "12px 14px", borderRadius: 8, background: "var(--surface-2)", border: "1px solid var(--line-soft)" }}>
+                  <div className="row" style={{ gap: 8, marginBottom: 4 }}>
+                    <Chip tone="chip-sage">Economic Benefits</Chip>
+                  </div>
+                  <ul style={{ paddingLeft: 18, fontSize: 13, lineHeight: 1.5, color: "var(--ink-2)", margin: 0 }}>
+                    <li><strong>Livelihood Protection</strong>: Prevents wage loss for tea plantation workers and terrace farmers.</li>
+                    <li><strong>Avoidance of Out-of-Pocket Costs</strong>: Prevents costly late-stage joint replacements (₹2.5L–₹5L+).</li>
+                    <li><strong>Zero Consumable Overhead</strong>: Highly scalable screening at negligible marginal cost.</li>
+                  </ul>
+                </div>
+
+                <div style={{ padding: "12px 14px", borderRadius: 8, background: "var(--surface-2)", border: "1px solid var(--line-soft)" }}>
+                  <div className="row" style={{ gap: 8, marginBottom: 4 }}>
+                    <Chip tone="chip-lilac">Clinical & Operational Benefits</Chip>
+                  </div>
+                  <ul style={{ paddingLeft: 18, fontSize: 13, lineHeight: 1.5, color: "var(--ink-2)", margin: 0 }}>
+                    <li><strong>Early KL Grade 0–1 Triage</strong>: Enables low-cost conservative therapy before cartilage loss.</li>
+                    <li><strong>100% Offline Edge Inference</strong>: Full functionality in zero-connectivity hill camps.</li>
+                    <li><strong>Quantitative Biomechanics</strong>: Objective sensor metrics replace subjective visual checks.</li>
+                  </ul>
+                </div>
+              </div>
+            </Card>
+
+            {/* High-Level Impact Card */}
+            <Card>
+              <CardHead title="High-Level Systemic Impact" sub="Long-term transformational outcomes for public health systems across NER" />
+              <div className="card-bd stack" style={{ gap: 16 }}>
+                <div style={{ padding: "14px 16px", borderRadius: 8, background: "var(--surface-2)", border: "1px solid var(--line-soft)" }}>
+                  <div className="eyebrow" style={{ color: "var(--ink)", marginBottom: 6 }}>Preventative Paradigm Shift</div>
+                  <p style={{ fontSize: 13, lineHeight: 1.55, color: "var(--ink-2)" }}>
+                    Transforms regional orthopedics from reactive treatment of late-stage joint destruction to proactive, community-wide early prevention.
+                  </p>
+                </div>
+
+                <div style={{ padding: "14px 16px", borderRadius: 8, background: "var(--surface-2)", border: "1px solid var(--line-soft)" }}>
+                  <div className="eyebrow" style={{ color: "var(--ink)", marginBottom: 6 }}>Epidemiological Hotspot Mapping</div>
+                  <p style={{ fontSize: 13, lineHeight: 1.55, color: "var(--ink-2)" }}>
+                    Aggregates synced offline screening data to map district-level prevalence heatmaps, empowering MDoNER and state ministries to allocate healthcare resources and physiotherapists precisely.
+                  </p>
+                </div>
+
+                <div style={{ padding: "14px 16px", borderRadius: 8, background: "var(--surface-2)", border: "1px solid var(--line-soft)" }}>
+                  <div className="eyebrow" style={{ color: "var(--ink)", marginBottom: 6 }}>Democratization of Healthcare Access</div>
+                  <p style={{ fontSize: 13, lineHeight: 1.55, color: "var(--ink-2)" }}>
+                    Decouples early musculoskeletal screening from capital-intensive urban tertiary hospitals, establishing a scalable, last-mile health architecture for off-grid rural communities.
+                  </p>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </Section>
+
         {/* ----------------------------------------------------- why NER -- */}
         <Section
           title="Why the North-East, specifically"
