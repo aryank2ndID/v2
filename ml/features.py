@@ -1,10 +1,15 @@
 """
 SANDHI — feature extraction.
 
-Signals in, 30 numbers out. This module is the contract between the kit and the
+Signals in, 27 numbers out. This module is the contract between the kit and the
 model, and it is mirrored in TypeScript at web/lib/dsp/features.ts so inference
 on the phone gives the same answer as training on the laptop.
-tools/parity_check.py proves the two agree.
+tools/parity_check.mjs proves the two agree.
+
+The contract is gait + sit-to-stand + intake. The piezo/vibroarthrography
+(crepitus) channel is intentionally NOT part of the model: the physical kit's
+piezo was never brought up to sample, so acoustic features were dropped to keep
+every deployed port aligned with a model the real hardware can actually feed.
 
 Nothing here sees the label. Everything is computed from the waveform.
 """
@@ -20,8 +25,6 @@ FEATURE_NAMES = [
     # sit-to-stand — 5 reps
     "sts_total_s", "sts_mean_rep_s", "sts_peak_angvel_dps",
     "sts_smoothness_ldlj", "sts_rep_cv_pct", "sts_trunk_lean_dps",
-    # vibroarthrography — piezo over the joint line
-    "vag_hf_ratio", "vag_burst_rate_hz", "vag_spec_entropy", "vag_rms_x1000",
     # intake — asked by the ASHA worker
     "age", "sex_f", "bmi", "occ_squat_load", "stairs_per_day",
     "terrain_slope_idx", "prior_injury", "family_hx",
@@ -187,70 +190,11 @@ def sts_features(sts):
     }
 
 
-# ------------------------------------------------------------------- VAG ----
-
-def band_energy(x, fs, lo, hi, nbands=24):
-    """Band energy by direct correlation — no FFT dependency, trivial TS port."""
-    edges = np.linspace(lo, hi, nbands + 1)
-    n = len(x)
-    w = np.hanning(n) if n > 8 else np.ones(n)
-    xw = x * w
-    t = np.arange(n) / fs
-    out = []
-    for i in range(nbands):
-        f = 0.5 * (edges[i] + edges[i + 1])
-        re = float(np.dot(xw, np.cos(2 * np.pi * f * t)))
-        im = float(np.dot(xw, np.sin(2 * np.pi * f * t)))
-        out.append((re * re + im * im) / (n * n))
-    return np.array(out), 0.5 * (edges[:-1] + edges[1:])
-
-
-def vag_features(vag):
-    fs = vag["fs"]
-    x = np.asarray(vag["mic"], dtype=float)
-    # Decimate by 2 for the spectral pass; crepitus energy lives below 1.5 kHz.
-    xd, fsd = x[::2], fs / 2.0
-
-    bands, centers = band_energy(xd, fsd, 20.0, 950.0, 24)
-    total = float(np.sum(bands)) + 1e-15
-    hf = float(np.sum(bands[centers > 200.0])) / total
-
-    p = bands / total
-    ent = float(-np.sum(p * np.log(p + 1e-15)) / np.log(len(p)))
-
-    # Burst detection runs on the HIGH-PASSED signal: crepitus is a short
-    # high-frequency transient, and the soft-tissue baseline would otherwise
-    # trip the detector on every breath.
-    xh = x - np.convolve(x, np.ones(32) / 32.0, mode="same")     # ~>125 Hz
-    win = max(4, int(0.010 * fs))
-    nfr = len(xh) // win
-    e = np.array([float(np.sum(xh[i * win:(i + 1) * win] ** 2)) for i in range(nfr)])
-    floor = float(np.median(e)) + 1e-12
-    bursts, armed = 0, True
-    for v in e:
-        if v > 6.0 * floor and armed:
-            bursts += 1
-            armed = False
-        elif v < 2.5 * floor:
-            armed = True
-    seconds = len(x) / fs
-
-    return {
-        "vag_hf_ratio": hf,
-        "vag_burst_rate_hz": bursts / seconds,
-        "vag_spec_entropy": ent,
-        "vag_rms_x1000": float(np.sqrt(np.mean(x ** 2)) * 1000.0),
-        "_bands": bands.tolist(),
-        "_band_centers": centers.tolist(),
-    }
-
-
 # ------------------------------------------------------------------ join ----
 
 def extract(session, intake):
     f = {}
-    for src in (gait_features(session["walk"]), sts_features(session["sts"]),
-                vag_features(session["vag"])):
+    for src in (gait_features(session["walk"]), sts_features(session["sts"])):
         f.update({k: v for k, v in src.items() if not k.startswith("_")})
     for k in INTAKE_FEATURES:
         f[k] = float(intake[k])

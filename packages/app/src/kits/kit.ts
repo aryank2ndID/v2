@@ -48,7 +48,6 @@ export interface SimSession {
   subject: ReturnType<typeof sampleSubject>;
   walk: WalkSignal;
   sts: StsSignal;
-  vag: { mic: Float64Array; fs: number };
 }
 
 export interface Kit {
@@ -265,7 +264,6 @@ export function createSimSession(intake: Intake): SimSession {
     subject: s,
     walk: session.walk,
     sts: session.sts,
-    vag: session.vag,
   };
 }
 

@@ -1,0 +1,73 @@
+{
+ "disclaimer": "Real-data baseline on the Voisard 2025 clinical gait dataset (figshare 10.6084/m9.figshare.28806086), KOA-vs-healthy. Sensor placement differs from the SANDHI kit (head/lowerback/feet vs thigh/shin/piezo); gait features use foot-contact timing + trunk. Cohorts are not age-matched (KOA ~70y vs healthy ~38y), which inflates intake-only discrimination. Not clinical validation.",
+ "dataset": {
+  "name": "Voisard2025_clinical_gait",
+  "trials": 438,
+  "subjects": 91,
+  "koa": 78,
+  "healthy": 360
+ },
+ "features": {
+  "names": [
+   "age",
+   "sex_f",
+   "bmi",
+   "womac_pain",
+   "cadence_spm",
+   "stride_time_s",
+   "stride_time_cv_pct",
+   "stance_pct",
+   "double_support_pct",
+   "step_asym_pct",
+   "gait_speed_est_mps",
+   "trunk_swing_amp",
+   "trunk_smoothness_ldlj"
+  ],
+  "intake": [
+   "age",
+   "sex_f",
+   "bmi",
+   "womac_pain"
+  ],
+  "gait": [
+   "cadence_spm",
+   "stride_time_s",
+   "stride_time_cv_pct",
+   "stance_pct",
+   "double_support_pct",
+   "step_asym_pct",
+   "gait_speed_est_mps",
+   "trunk_swing_amp",
+   "trunk_smoothness_ldlj"
+  ]
+ },
+ "results": {
+  "intake_only": {
+   "auc": 1.0,
+   "ci95": [
+    1.0,
+    1.0
+   ]
+  },
+  "gait_only": {
+   "auc": 0.7762820512820513,
+   "ci95": [
+    0.6813703926282051,
+    0.9067502945485587
+   ]
+  },
+  "intake_plus_gait": {
+   "auc": 1.0,
+   "ci95": [
+    1.0,
+    1.0
+   ]
+  },
+  "delta_intake_plus_gait_vs_intake": 0.0
+ },
+ "cohort_age_mismatch": {
+  "koa_mean_age": 69.67948717948718,
+  "healthy_mean_age": 37.705555555555556
+ },
+ "elapsed_s": 17.2
+}

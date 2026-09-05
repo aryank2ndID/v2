@@ -281,6 +281,5 @@ export function synthSession(rng: Rng, subj: Subject) {
   return {
     walk: synthWalk(rng, subj._sevFunc, nuisance),
     sts: synthSts(rng, subj._sevFunc, nuisance),
-    vag: synthVag(rng, subj._sevVag, subj._coupling),
   };
 }

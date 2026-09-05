@@ -2,6 +2,7 @@ import sys
 import os
 import time
 import uuid
+import json
 from typing import List, Dict, Any, Union
 from datetime import datetime, timezone
 from fastapi import FastAPI, HTTPException, Request
@@ -11,27 +12,66 @@ from pydantic import ValidationError
 # Ensure core and cv are in path if running directly for dev
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../core"))
 
-# Try to import the local model for the ML check
+# The phone and the web ship the SAME 27-feature GBM that ml/train.py writes.
+# Resolve it from this repo so the server can re-score every inbound record
+# against the artifact the clients carry — the tamper check.
+_ML_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../ml"))
+sys.path.append(_ML_ROOT)
+
 try:
-    from oa_core import assess, Assessment
-    MODEL_AVAILABLE = True
-except ImportError:
+    import numpy as np
+    from gbm import GBM
+    from features import FEATURE_NAMES, to_vector
+    _CHECK_MODEL = None
+    _check_model_path = os.path.join(_ML_ROOT, "out", "model.json")
+    if os.path.exists(_check_model_path):
+        with open(_check_model_path) as f:
+            _check_doc = json.load(f)
+            _CHECK_MODEL = GBM.from_json(_check_doc)
+            _b = _check_doc.get("bands", {"low": 0.1, "refer": 0.185})
+            _CHECK_MODEL_BAND_LOW = float(_b.get("low", 0.1))
+            _CHECK_MODEL_BAND_REFER = float(_b.get("refer", 0.185))
+    MODEL_AVAILABLE = _CHECK_MODEL is not None
+except Exception as e:  # noqa: BLE001
     MODEL_AVAILABLE = False
-    print("Warning: oa_core not found. ML checks will be skipped.")
+    _CHECK_MODEL = None
+    print(f"Warning: oa_core/GBM not found. ML checks will be skipped. ({e})")
+
+# The ^NER- patient_id pattern lives on oa_core.schema.Patient, which the ingest
+# path no longer constructs: the client's `patient` is a display name and
+# `client_id` is the idempotency key. oa_core remains importable for the rule
+# engine but the GBM cross-check above is the substantive server-side check.
 
 from .models import IngestReq, Screening, Referral, ReferralUpdate
 from .store import FileStore
 
 app = FastAPI(title="OA Early Detection API", version="0.4.0")
 
-# CORS middleware equivalent to the Go server
+# CORS is locked down, not open by default. A browser tab on an arbitrary site
+# must not be able to POST screenings into this server (classic localhost-service
+# attack). Dev host is allowed on any local port; production origins are set via
+# SANDHI_CORS_ORIGINS (comma-separated). No cookies/tokens are involved in the
+# browser flow, so allow_credentials stays False.
+_cors_origins = [o.strip() for o in os.environ.get("SANDHI_CORS_ORIGINS", "").split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=_cors_origins or ["http://localhost:4321", "http://127.0.0.1:4321"],
+    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$" if not _cors_origins else None,
+    allow_credentials=False,
     allow_methods=["GET", "POST", "OPTIONS"],
-    allow_headers=["content-type"],
+    allow_headers=["content-type", "authorization"],
 )
+
+# Optional write gate for deployments that hold real patient records:
+#   SANDHI_SYNC_TOKEN=<secret>   -> /v1/screenings and referral updates demand
+#                                   "Authorization: Bearer <secret>".
+# Unset for the local demo; set it the moment the log holds real PHI.
+SYNC_TOKEN = os.environ.get("SANDHI_SYNC_TOKEN", "")
+
+def _check_auth(authorization: str | None) -> None:
+    if SYNC_TOKEN:
+        if not authorization or authorization != f"Bearer {SYNC_TOKEN}":
+            raise HTTPException(status_code=401, detail="missing or invalid sync token")
 
 # Initialize store
 store = FileStore("sandhi.log")
@@ -52,7 +92,8 @@ def handle_health():
     }
 
 @app.post("/v1/screenings")
-def handle_ingest(req_data: Union[IngestReq, List[IngestReq]]):
+def handle_ingest(req_data: Union[IngestReq, List[IngestReq]], request: Request):
+    _check_auth(request.headers.get("authorization"))
     # Accepts one screening or a batch
     if not isinstance(req_data, list):
         batch = [req_data]
@@ -73,21 +114,22 @@ def handle_ingest(req_data: Union[IngestReq, List[IngestReq]]):
         captured_at = req.captured_at or datetime.now(timezone.utc)
         
         # --- Local ML Model Check ---
+        # Score the inbound 27-feature vector with the same artifact the phone
+        # ships. If the client compressed or edited its features/risk, the
+        # server-side probability will not agree with the reported band.
         server_risk = None
         server_band = None
-        
-        if MODEL_AVAILABLE:
+
+        if MODEL_AVAILABLE and _CHECK_MODEL is not None:
             try:
-                # Perform the local assessment check using oa_core
-                # We map the incoming features to an Assessment object
-                local_assessment = Assessment(
-                    id=req.client_id,
-                    patient_id=req.patient,
-                    features=req.features
-                )
-                result = assess(local_assessment)
-                server_risk = result.score_0_100 / 100.0  # Normalize to [0,1]
-                server_band = result.band.lower()
+                vec = np.zeros(len(FEATURE_NAMES))
+                for i, n in enumerate(FEATURE_NAMES):
+                    if n in req.features:
+                        vec[i] = float(req.features[n])
+                p = float(_CHECK_MODEL.predict_proba(vec.reshape(1, -1))[0])
+                server_risk = p
+                server_band = "refer" if p >= _CHECK_MODEL_BAND_REFER \
+                    else "low" if p < _CHECK_MODEL_BAND_LOW else "watch"
             except Exception as e:
                 print(f"Local ML model check failed: {e}")
         # ----------------------------
@@ -143,7 +185,8 @@ def handle_list(district: str = "", band: str = "", since: str = "", limit: int 
     }
 
 @app.post("/v1/screenings/{client_id}/referral")
-def handle_referral(client_id: str, update: ReferralUpdate):
+def handle_referral(client_id: str, update: ReferralUpdate, request: Request):
+    _check_auth(request.headers.get("authorization"))
     if update.status not in ["issued", "seen", "declined"]:
         raise HTTPException(status_code=400, detail="status must be issued, seen or declined")
         

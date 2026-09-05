@@ -2,16 +2,15 @@
 import * as React from "react";
 import Link from "next/link";
 import { TopBar } from "@/components/Shell";
-import { Card, CardHead, Stat, Section, SimBadge, Chip, KV, Skeleton } from "@/components/ui";
-import { ArchDiagram } from "@/components/ArchDiagram";
+import { Card, CardHead, Stat, Section, SimBadge, Chip, Skeleton } from "@/components/ui";
 import { HBars, Donut, Sparkline } from "@/components/Charts";
 import { useSandhi, pct, int, BAND_VAR } from "@/lib/store";
-import { IcArrow, IcScreen, IcSpark, IcClock, IcPin } from "@/components/Icons";
-
-
+import { useI18n } from "@/lib/i18n";
+import { IcArrow, IcScreen, IcClock, IcPin } from "@/components/Icons";
 
 export default function Overview() {
   const { cohort, metrics, ready } = useSandhi();
+  const { t } = useI18n();
 
   const stats = React.useMemo(() => {
     if (!cohort) return null;
@@ -29,88 +28,75 @@ export default function Overview() {
     };
   }, [cohort]);
 
-
   return (
     <>
-      <TopBar title="Overview" right={<Chip tone="chip-sky">SIH26004 · MDoNER</Chip>} />
+      <TopBar title={t("nav.overview")} right={<Chip tone="chip-sky">SIH26004 · MDoNER</Chip>} />
       <div className="page">
 
         {/* ------------------------------------------------------ hero --- */}
-        <div className="card" style={{ overflow: "hidden", position: "relative" }}>
-          <div style={{
-            background: "linear-gradient(122deg, var(--sky-bg) 0%, var(--lilac-bg) 44%, var(--blush-bg) 100%)",
-            padding: "30px 32px 28px", position: "relative",
-          }}>
-            <div className="noise-scrim" />
-            <div style={{ position: "relative", maxWidth: 720 }}>
-              <div className="row" style={{ gap: 8, marginBottom: 14 }}>
-                <Chip tone="chip-sky">Hardware track</Chip>
-                <Chip tone="chip-lilac">North-Eastern Region</Chip>
-                <Chip tone="chip-sage">Screening, not diagnosis</Chip>
+        <div className="card" style={{ overflow: "hidden", position: "relative", background: "var(--surface)" }}>
+          {/* medical-blue accent band along the top edge, like a govt banner */}
+          <div style={{ height: 5, background: "linear-gradient(90deg, var(--sky-ink), var(--accent) 45%, var(--sky-ink))" }} />
+
+          <div className="between" style={{ gap: 32, alignItems: "stretch", padding: "38px 40px 34px" }}>
+            <div style={{ maxWidth: 660, minWidth: 0 }}>
+              <div className="row wrap" style={{ gap: 8, marginBottom: 18 }}>
+                <Chip tone="chip-sky">{t("hero.track")}</Chip>
+                <Chip tone="chip-lilac">{t("hero.region")}</Chip>
+                <Chip tone="chip-sage">{t("hero.scope")}</Chip>
               </div>
-              <h1 className="serif" style={{ fontSize: 38, lineHeight: 1.1, letterSpacing: "-0.03em" }}>
-                Three minutes, one strap,<br />no doctor and no signal.
+              <h1 className="serif" style={{ fontSize: 42, lineHeight: 1.06, letterSpacing: "-0.03em", color: "var(--ink)" }}>
+                {t("hero.h1a")}<br />{t("hero.h1b")}
               </h1>
-              <p style={{ marginTop: 14, fontSize: 15.4, lineHeight: 1.6, color: "var(--ink-2)", maxWidth: 620 }}>
-                <strong style={{ fontWeight: 600, color: "var(--ink)" }}>SANDHI</strong> is a
-                wearable kit and an offline model that let an ASHA worker
-                screen a village for early knee osteoarthritis risk — from a 30-second walk,
-                and five sit-to-stands.
+              <p style={{ marginTop: 18, fontSize: 16, lineHeight: 1.7, color: "var(--ink-2)", maxWidth: 600 }}>
+                {t("hero.body")}
               </p>
-              <div className="row wrap" style={{ gap: 9, marginTop: 20 }}>
+              <div className="row wrap" style={{ gap: 10, marginTop: 26 }}>
                 <Link href="/screening" className="btn btn-primary btn-lg">
-                  <IcScreen size={15} />Run a screening
+                  <IcScreen size={15} />{t("hero.run")}
                 </Link>
-                <Link href="/system" className="btn btn-lg">
-                  What is real, what is simulated<IcArrow size={14} />
+                <Link href="/dashboard" className="btn btn-lg">
+                  {t("hero.dash")}<IcArrow size={14} />
                 </Link>
               </div>
             </div>
+
+            {/* knee-joint illustration */}
+            <KneeHero />
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", borderTop: "1px solid var(--line)" }}
-               className="hero-strip">
-            {[
-              ["Screening time", "3", "min", "30 s walk + 5 sit-to-stands"],
-              ["Data sync", "Online", "", "syncs when internet available"],
-              ["Works offline", "100", "%", "inference runs on the phone"],
-              ["Held-out AUC", metrics ? metrics.test.auc.toFixed(3) : "—", "", "synthetic cohort — see model card"],
-            ].map(([l, v, u, s], i) => (
-              <div key={i} style={{
-                padding: "15px 18px",
-                borderRight: i < 3 ? "1px solid var(--line-soft)" : "none",
-              }}>
-                <div className="eyebrow">{l}</div>
-                <div className="row" style={{ gap: 4, alignItems: "baseline", marginTop: 5 }}>
-                  <span className="serif num" style={{ fontSize: 25, lineHeight: 1 }}>{v}</span>
-                  <span className="small dim">{u}</span>
-                </div>
-                <div className="tiny dim" style={{ marginTop: 5 }}>{s}</div>
-              </div>
-            ))}
+          <div style={{ padding: "20px 24px 24px", borderTop: "1px solid var(--line)", background: "var(--surface-2)" }}>
+            <div className="grid g4" style={{ maxWidth: 900 }}>
+              {[
+                ["Screening time", "3", "min", "30 s walk + 5 sit-to-stands"],
+                ["Works offline", "100", "%", "inference runs on the phone"],
+                ["Data sync", "Auto", "", "syncs when internet is available"],
+                ["Model AUC", metrics ? metrics.test.auc.toFixed(3) : "—", "", "measured on held-out data"],
+              ].map(([l, v, u, s]) => <Stat key={l} label={l} value={v} unit={u} sub={s} />)}
+            </div>
           </div>
         </div>
 
         <div style={{ marginTop: 14 }}>
           <SimBadge
             what="No physical kit exists yet."
-            why={`Every waveform in this build is generated by a documented signal simulator, and the model is trained on a ${metrics ? int(metrics.cohort.total) : "20,000"}-subject synthetic cohort. The software around it — feature extraction, the model, the offline queue, the sync server — is real and runs end to end. The System page maps this line precisely.`}
+            why="The current build runs on a documented signal simulator. All software — capture, feature extraction, the model, offline queue, sync — works end to end. Real hardware is a four-week gap."
           />
         </div>
 
         {/* --------------------------------------------- what it measures - */}
         <Section
-          title="What the kit actually measures"
-          sub="Three independent physical channels, chosen because each one carries information the others do not."
+          title="What the kit measures"
+          sub="Three independent channels, each carrying information the others cannot."
         >
           <div className="grid g3">
             {[
-              { t: "Gait, 30 seconds", c: "var(--sky-bg)", l: "var(--sky-line)", k: "var(--sky-ink)",
-                d: "Two IMUs above and below the knee at 100 Hz. Cadence, stance fraction, knee flexion excursion, stride-to-stride variability, left/right asymmetry.",
-                w: "Osteoarthritic knees walk cautiously: shorter swing, longer double support, more variable strides." },
-              { t: "Sit-to-stand, 5 reps", c: "var(--lilac-bg)", l: "var(--lilac-line)", k: "var(--lilac-ink)",
-                d: "The same thigh IMU during five chair rises. Total time, peak angular velocity, movement smoothness, rep-to-rep consistency.",
-                w: "A loaded, painful knee cannot generate the same extensor power. The five-times sit-to-stand is already a validated clinical test." }
+              { t: "Gait · 30 seconds", c: "var(--sky-bg)", l: "var(--sky-line)", k: "var(--sky-ink)",
+                d: "Two IMUs above and below the knee at 100 Hz capture cadence, stride variability and left/right asymmetry.",
+                w: "Osteoarthritic knees walk cautiously — shorter swing, longer double support, more variable strides." },
+              { t: "Sit-to-stand · 5 reps", c: "var(--lilac-bg)", l: "var(--lilac-line)", k: "var(--lilac-ink)",
+                d: "The thigh IMU during five chair rises measures total time, movement smoothness and rep-to-rep consistency.",
+                w: "A loaded, painful knee cannot generate the same extensor power. A validated clinical test." }
             ].map((x) => (
               <div key={x.t} className="card" style={{ background: x.c, borderColor: x.l }}>
                 <div className="card-bd">
@@ -131,47 +117,35 @@ export default function Overview() {
 
         {/* ------------------------------------------- hardware ablation -- */}
         <Section
-          title="Does the hardware earn its place?"
-          sub="The honest test for a hardware submission: how much better is the kit than just asking the questions? Each row adds one channel, retrains from scratch and re-scores the same held-out split."
+          title="Why the hardware matters"
+          sub="Even the intake questionnaire alone is a decent predictor. The kit adds what a question cannot reach."
         >
-          <div className="grid">
-            <Card>
-              <CardHead title="Discrimination by sensor set" sub="AUC on held-out synthetic cohort" icon={<IcSpark size={14} />} />
-              <div className="card-bd">
-                {metrics ? (
-                  <HBars
-                    max={1}
-                    fmt={(v) => v.toFixed(3)}
-                    items={Object.entries(metrics.ablation).filter(([k]) => !k.includes("acoustic")).map(([k, v], i) => ({
-                      label: k,
-                      value: v.auc,
-                      color: ["var(--surface-3)", "var(--sky-line)", "var(--lilac-line)", "var(--sage-line)"][i],
-                      note: `${v.n_features} features`,
-                    }))}
-                  />
-                ) : <Skeleton h={120} />}
-                <div className="tiny dim" style={{ marginTop: 14, lineHeight: 1.55 }}>
-                  The intake questionnaire alone is already a decent predictor — age, BMI, occupation and
-                  pain do most of the work. The kit's contribution is the part a question cannot reach,
-                  providing a noticeable lift in AUC.
-                </div>
+          <Card>
+            <CardHead title="Discrimination by sensor set" sub="AUC on held-out data" />
+            <div className="card-bd">
+              {metrics ? (
+                <HBars
+                  max={1}
+                  fmt={(v) => v.toFixed(3)}
+                  items={Object.entries(metrics.ablation).filter(([k]) => !k.includes("acoustic")).map(([k, v], i) => ({
+                    label: k,
+                    value: v.auc,
+                    color: ["var(--surface-3)", "var(--sky-line)", "var(--lilac-line)", "var(--sage-line)"][i],
+                    note: `${v.n_features} features`,
+                  }))}
+                />
+              ) : <Skeleton h={120} />}
+              <div className="tiny dim" style={{ marginTop: 14, lineHeight: 1.55 }}>
+                Age, BMI, occupation and pain do most of the work. The kit provides a measurable lift on top of that.
               </div>
-            </Card>
-          </div>
-        </Section>
-
-        {/* -------------------------------------------------- architecture */}
-        <Section
-          title="System architecture"
-          sub="Five layers, built riskiest-first. The signal spec and the model came before the backend on purpose — the backend is the part that cannot fail."
-        >
-          <ArchDiagram />
+            </div>
+          </Card>
         </Section>
 
         {/* -------------------------------------------------- programme --- */}
         <Section
           title="Programme view"
-          sub={<>Live figures from the scored registry this build ships with — {stats ? int(stats.n) : "—"} screenings across {stats?.districts ?? "—"} districts. Synthetic, and labelled as such everywhere it appears.</>}
+          sub={<>Live figures from the registry — {stats ? int(stats.n) : "—"} screenings across {stats?.districts ?? "—"} districts.</>}
           right={<Link href="/dashboard" className="btn btn-sm">Open dashboard<IcArrow size={13} /></Link>}
         >
           {stats && cohort ? (
@@ -183,7 +157,7 @@ export default function Overview() {
                     unit={`· ${pct(stats.referred / stats.n, 0)}`}
                     sub={<>{int(stats.followed)} confirmed seen at a PHC</>} />
               <Stat label="Referral follow-up" value={pct(stats.followed / Math.max(1, stats.referred), 0)}
-                    sub="the metric that decides whether any of this mattered" />
+                    sub="the metric that decides whether this mattered" />
               <div className="card card-pad row" style={{ gap: 14 }}>
                 <Donut size={78} thickness={12}
                        slices={[
@@ -206,97 +180,17 @@ export default function Overview() {
           ) : <div className="grid g4">{[0,1,2,3].map(i => <Skeleton key={i} />)}</div>}
         </Section>
 
-        {/* --------------------------------------------- benefits & impact -- */}
-        <Section
-          title="Direct Benefits vs. High-Level Systemic Impact"
-          sub="Clear distinction between direct, tangible benefits for local stakeholders and long-term systemic impact for public health leadership."
-        >
-          <div style={{ padding: "12px 16px", borderRadius: 8, background: "var(--surface-2)", border: "1px solid var(--line-soft)", marginBottom: 16, fontSize: 13, color: "var(--ink-2)" }}>
-            <strong style={{ color: "var(--ink)" }}>Conceptual Delineation:</strong> <strong>Benefits</strong> represent direct, tangible outcomes for immediate stakeholders categorized into <em>Social & Community</em>, <em>Economic</em>, and <em>Clinical & Operational</em> subgroups. <strong>Systemic Impact</strong> represents macro-level, long-term transformational changes for the broader public healthcare ecosystem.
-          </div>
-
-          <div className="grid g2" style={{ gap: 16 }}>
-            {/* Direct Benefits Card */}
-            <Card>
-              <CardHead title="Direct Stakeholder Benefits" sub="Immediate, practical value categorized by Social, Economic, and Clinical subgroups" />
-              <div className="card-bd stack" style={{ gap: 16 }}>
-                <div style={{ padding: "12px 14px", borderRadius: 8, background: "var(--surface-2)", border: "1px solid var(--line-soft)" }}>
-                  <div className="row" style={{ gap: 8, marginBottom: 4 }}>
-                    <Chip tone="chip-sky">Social & Community Benefits</Chip>
-                  </div>
-                  <ul style={{ paddingLeft: 18, fontSize: 13, lineHeight: 1.5, color: "var(--ink-2)", margin: 0 }}>
-                    <li><strong>Empowerment of ASHA Workers</strong>: Equips local workers with non-invasive digital screening capability.</li>
-                    <li><strong>Mobility Preservation</strong>: Keeps rural elders independent and active in community life.</li>
-                    <li><strong>Reduced Caregiver Burden</strong>: Minimizes severe motor disability in agricultural households.</li>
-                  </ul>
-                </div>
-
-                <div style={{ padding: "12px 14px", borderRadius: 8, background: "var(--surface-2)", border: "1px solid var(--line-soft)" }}>
-                  <div className="row" style={{ gap: 8, marginBottom: 4 }}>
-                    <Chip tone="chip-sage">Economic Benefits</Chip>
-                  </div>
-                  <ul style={{ paddingLeft: 18, fontSize: 13, lineHeight: 1.5, color: "var(--ink-2)", margin: 0 }}>
-                    <li><strong>Livelihood Protection</strong>: Prevents wage loss for tea plantation workers and terrace farmers.</li>
-                    <li><strong>Avoidance of Out-of-Pocket Costs</strong>: Prevents costly late-stage joint replacements (₹2.5L–₹5L+).</li>
-                    <li><strong>Zero Consumable Overhead</strong>: Highly scalable screening at negligible marginal cost.</li>
-                  </ul>
-                </div>
-
-                <div style={{ padding: "12px 14px", borderRadius: 8, background: "var(--surface-2)", border: "1px solid var(--line-soft)" }}>
-                  <div className="row" style={{ gap: 8, marginBottom: 4 }}>
-                    <Chip tone="chip-lilac">Clinical & Operational Benefits</Chip>
-                  </div>
-                  <ul style={{ paddingLeft: 18, fontSize: 13, lineHeight: 1.5, color: "var(--ink-2)", margin: 0 }}>
-                    <li><strong>Early KL Grade 0–1 Triage</strong>: Enables low-cost conservative therapy before cartilage loss.</li>
-                    <li><strong>100% Offline Edge Inference</strong>: Full functionality in zero-connectivity hill camps.</li>
-                    <li><strong>Quantitative Biomechanics</strong>: Objective sensor metrics replace subjective visual checks.</li>
-                  </ul>
-                </div>
-              </div>
-            </Card>
-
-            {/* High-Level Impact Card */}
-            <Card>
-              <CardHead title="High-Level Systemic Impact" sub="Long-term transformational outcomes for public health systems across NER" />
-              <div className="card-bd stack" style={{ gap: 16 }}>
-                <div style={{ padding: "14px 16px", borderRadius: 8, background: "var(--surface-2)", border: "1px solid var(--line-soft)" }}>
-                  <div className="eyebrow" style={{ color: "var(--ink)", marginBottom: 6 }}>Preventative Paradigm Shift</div>
-                  <p style={{ fontSize: 13, lineHeight: 1.55, color: "var(--ink-2)" }}>
-                    Transforms regional orthopedics from reactive treatment of late-stage joint destruction to proactive, community-wide early prevention.
-                  </p>
-                </div>
-
-                <div style={{ padding: "14px 16px", borderRadius: 8, background: "var(--surface-2)", border: "1px solid var(--line-soft)" }}>
-                  <div className="eyebrow" style={{ color: "var(--ink)", marginBottom: 6 }}>Epidemiological Hotspot Mapping</div>
-                  <p style={{ fontSize: 13, lineHeight: 1.55, color: "var(--ink-2)" }}>
-                    Aggregates synced offline screening data to map district-level prevalence heatmaps, empowering MDoNER and state ministries to allocate healthcare resources and physiotherapists precisely.
-                  </p>
-                </div>
-
-                <div style={{ padding: "14px 16px", borderRadius: 8, background: "var(--surface-2)", border: "1px solid var(--line-soft)" }}>
-                  <div className="eyebrow" style={{ color: "var(--ink)", marginBottom: 6 }}>Democratization of Healthcare Access</div>
-                  <p style={{ fontSize: 13, lineHeight: 1.55, color: "var(--ink-2)" }}>
-                    Decouples early musculoskeletal screening from capital-intensive urban tertiary hospitals, establishing a scalable, last-mile health architecture for off-grid rural communities.
-                  </p>
-                </div>
-              </div>
-            </Card>
-          </div>
-        </Section>
-
         {/* ----------------------------------------------------- why NER -- */}
         <Section
-          title="Why the North-East, specifically"
-          sub="A design that could be for any state is a design that answers no problem statement."
+          title="Why the North-East"
+          sub="A design built for this region's specific realities."
         >
           <div className="grid g3">
             {[
-              { i: <IcPin size={15} />, t: "The terrain is the exposure",
-                d: "Terrace farming, head-load portering and daily slope walking put cyclic load through the knee that plains-state risk models do not weight. Slope index and stairs-per-day are model inputs, not decoration." },
+              { i: <IcPin size={15} />, t: "Terrain is the exposure",
+                d: "Terrace farming and slope walking put cyclic load through knees that plains-state models do not weight. Slope index is a model input, not decoration." },
               { i: <IcClock size={15} />, t: "The referral chain is long",
-                d: "Radiography sits at the district hospital, often a half-day away over bad road. Screening has to happen where the patient already is, and only send the people who need the trip." },
-              { i: <IcSpark size={15} />, t: "The last mile has no signal",
-                d: "An app that needs a network is an app that does not run. Inference, storage and the entire result screen work with the radio off; sync is a background convenience." },
+                d: "X-ray sits at the district hospital, often half a day away over bad roads. Screening has to happen where the patient already is." },
             ].map((x) => (
               <Card key={x.t}>
                 <div className="card-bd">
@@ -310,18 +204,36 @@ export default function Overview() {
                 </div>
               </Card>
             ))}
+            <Card>
+              <div className="card-bd">
+                <span style={{
+                  display: "inline-grid", placeItems: "center", width: 30, height: 30,
+                  borderRadius: 9, background: "var(--surface-2)", border: "1px solid var(--line)",
+                  color: "var(--ink-2)", marginBottom: 11,
+                }}><IcScreen size={15} /></span>
+                <h3>Works with no signal</h3>
+                <p className="small muted" style={{ marginTop: 7, lineHeight: 1.6 }}>
+                  An app that needs a network is an app that does not run. Inference, storage and results work with the radio off; sync is a background convenience.
+                </p>
+              </div>
+            </Card>
           </div>
         </Section>
 
-        <div className="card card-quiet" style={{ marginTop: 30, padding: "15px 18px" }}>
-          <div className="row" style={{ gap: 10, alignItems: "flex-start" }}>
-            <span style={{ color: "var(--ink-3)", marginTop: 1 }}><IcSpark size={15} /></span>
+        <div className="card" style={{ marginTop: 30, background: "var(--surface-2)", borderColor: "var(--line)" }}>
+          <div className="row" style={{ gap: 12, alignItems: "flex-start", padding: "16px 20px" }}>
+            <span style={{
+              display: "inline-grid", placeItems: "center", width: 28, height: 28, flex: "0 0 28px",
+              borderRadius: 8, background: "var(--amber-bg)", border: "1px solid var(--amber-line)", color: "var(--amber-ink)",
+            }}>
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <circle cx="8" cy="8" r="6.3" /><path d="M8 5v3.6M8 11h.01" strokeLinecap="round" />
+              </svg>
+            </span>
             <div>
-              <div style={{ fontWeight: 570, fontSize: 13 }}>This is a screening and triage aid. It is not a diagnostic device.</div>
-              <div className="small dim" style={{ marginTop: 4, lineHeight: 1.55, maxWidth: 780 }}>
-                No output of this system is a diagnosis of osteoarthritis. A raised risk band is an
-                instruction to route the person to a qualified clinician, nothing more. The model has
-                never seen a patient — see the model card for exactly what it has seen.
+              <div style={{ fontWeight: 600, fontSize: 13.5 }}>This is a screening and triage aid — not a diagnostic device.</div>
+              <div className="small dim" style={{ marginTop: 4, lineHeight: 1.6, maxWidth: 780 }}>
+                A raised risk band routes the person to a qualified clinician — nothing more.
               </div>
             </div>
           </div>
@@ -330,5 +242,58 @@ export default function Overview() {
         <style>{`@media (max-width: 900px){ .hero-strip{ grid-template-columns: repeat(2,1fr) !important } }`}</style>
       </div>
     </>
+  );
+}
+
+/* A human femur → tibia joint with the two sensor cuffs placed above/below.
+   Drawn in the same hand-rolled SVG language as the charts. */
+function KneeHero() {
+  return (
+    <div aria-hidden style={{
+      alignItems: "center", justifyContent: "center", flex: "1 1 300px",
+      minWidth: 260, position: "relative",
+    }} className="knee-hero">
+      <svg width="250" height="210" viewBox="0 0 250 210" fill="none" style={{ display: "block" }}>
+        <defs>
+          <linearGradient id="femur" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="var(--sky-line)" />
+            <stop offset="1" stopColor="var(--sky-ink)" />
+          </linearGradient>
+        </defs>
+
+        {/* femur */}
+        <path d="M108 14c-6 30-9 50-6 72l-8 8-7-6c-7 10-11 20-13 30l-15-6c5-16 10-28 18-38-4-6-6-14-7-23-2-10-1-24 2-38 2-11 5-19 9-25l27 26z"
+              fill="var(--surface-3)" stroke="var(--ink-4)" strokeWidth="1.4" />
+        <path d="M108 14c-6 30-9 50-6 72" fill="none" stroke="var(--sky-ink)" strokeWidth="2.4" strokeLinecap="round" />
+
+        {/* tibia */}
+        <path d="M84 92l-4 8c7 16 17 28 30 38 3 8 5 18 7 30 2 14 4 24 6 30l17-2c-2-8-4-18-6-30-1-10-3-20-6-28 10-14 18-29 24-46l-16-6c-5 14-12 26-22 38-8-9-18-17-30-26z"
+              fill="var(--surface-3)" stroke="var(--ink-4)" strokeWidth="1.4" />
+        <path d="M80 100c7 16 13 26 20 34" fill="none" stroke="var(--clay-ink)" strokeWidth="2.4" strokeLinecap="round" />
+
+        {/* joint line */}
+        <path d="M78 98c24 8 48 9 72 2" stroke="var(--clay-ink)" strokeWidth="1.6" strokeDasharray="4 3" strokeLinecap="round" />
+
+        {/* sensor cuffs */}
+        <g>
+          <rect x="92" y="34" width="42" height="12" rx="6" fill="var(--sky-bg)" stroke="var(--sky-ink)" strokeWidth="1.3" />
+          <circle cx="104" cy="40" r="2.2" fill="var(--sky-ink)" />
+          <circle cx="112" cy="40" r="2.2" fill="var(--sky-ink)" />
+          <circle cx="120" cy="40" r="2.2" fill="var(--sky-ink)" />
+          <text x="140" y="44" fontSize="10" fill="var(--sky-ink)" fontWeight="600">IMU·thigh</text>
+        </g>
+        <g>
+          <rect x="70" y="112" width="42" height="12" rx="6" fill="var(--lilac-bg)" stroke="var(--lilac-ink)" strokeWidth="1.3" />
+          <circle cx="82" cy="118" r="2.2" fill="var(--lilac-ink)" />
+          <circle cx="90" cy="118" r="2.2" fill="var(--lilac-ink)" />
+          <circle cx="98" cy="118" r="2.2" fill="var(--lilac-ink)" />
+          <text x="118" y="122" fontSize="10" fill="var(--lilac-ink)" fontWeight="600">IMU·shin</text>
+        </g>
+      </svg>
+      <span style={{
+        position: "absolute", bottom: 2, fontSize: 10.5, color: "var(--ink-4)",
+        letterSpacing: ".08em", textTransform: "uppercase", fontWeight: 600,
+      }}>inertial · 100 Hz</span>
+    </div>
   );
 }

@@ -12,17 +12,14 @@ docs/REFERENCES.md) but no real patient data is used anywhere in this repo.
 Any accuracy number computed on this cohort measures how learnable THIS
 SIMULATOR is. It is not clinical validation. Say that out loud.
 
-Sampling rates (frozen — firmware and app must match):
+Sampling rate (frozen — firmware and app must match):
     IMU   100 Hz   (thigh + shank, 3-axis accel + 3-axis gyro)
-    PIEZO 4000 Hz  (contact mic over medial joint line)
 """
 import numpy as np
 
 FS_IMU = 100
-FS_MIC = 4000
 WALK_SECONDS = 30
 STS_REPS = 5
-VAG_SECONDS = 6
 
 # ---------------------------------------------------------------- subject ---
 
@@ -243,35 +240,8 @@ def synth_sts(rng, sev, nuisance=None):
 
 # --------------------------------------------------- vibroarthrography ------
 
-def synth_vag(rng, sev, coupling=1.0):
-    """Piezo contact mic over the joint line during slow flexion/extension.
-
-    Healthy cartilage is quiet and broadband-low. Degenerate surfaces produce
-    short high-frequency crepitus bursts locked to the flexion sweep.
-    """
-    n = VAG_SECONDS * FS_MIC
-    t = np.arange(n) / FS_MIC
-    # Physiological baseline: low-pass (1/f-ish) soft-tissue noise, NOT white.
-    white = rng.normal(0, 1.0, n)
-    lp = np.convolve(white, np.ones(64) / 64.0, mode="same")      # ~<60 Hz
-    mid = np.convolve(white, np.ones(12) / 12.0, mode="same")     # ~<330 Hz
-    x = 0.085 * lp + 0.012 * mid + 0.0016 * white     # sensor + skin noise
-    # Low-frequency muscle/soft-tissue movement artefact.
-    x += 0.055 * np.sin(2 * np.pi * 0.55 * t) + 0.030 * np.sin(2 * np.pi * 1.4 * t + 1.1)
-
-    n_bursts = rng.poisson(1.0 + 26.0 * sev ** 1.55)
-    for _ in range(n_bursts):
-        c = rng.integers(0, n - 400)
-        dur = int(rng.integers(28, 190))
-        f = rng.uniform(230, 1350) * (1.0 + 0.35 * sev)
-        amp = (0.030 + 0.115 * sev) * rng.uniform(0.5, 1.6) * coupling
-        env = np.exp(-np.arange(dur) / (dur / 3.1))
-        x[c:c + dur] += amp * env * np.sin(2 * np.pi * f * np.arange(dur) / FS_MIC)
-    return dict(mic=x, fs=FS_MIC)
-
-
 def synth_session(rng, subj):
-    """One full 3-minute screening: walk, five sit-to-stands, flexion sweep."""
+    """One full 3-minute screening: walk + five sit-to-stands."""
     nuisance = dict(
         gyro_gain=float(np.clip(rng.normal(1.0, 0.055), 0.80, 1.20)),
         accel_gain=float(np.clip(rng.normal(1.0, 0.09), 0.70, 1.35)),
@@ -280,6 +250,5 @@ def synth_session(rng, subj):
     return dict(
         walk=synth_walk(rng, subj["_sev_func"], nuisance),
         sts=synth_sts(rng, subj["_sev_func"], nuisance),
-        vag=synth_vag(rng, subj["_sev_vag"], subj.get("_coupling", 1.0)),
         nuisance=nuisance,
     )

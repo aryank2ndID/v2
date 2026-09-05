@@ -29,8 +29,8 @@ const STATE_TINT: Record<string, string> = {
 
 function rampColor(rate: number, lo: number, hi: number) {
   const t = Math.max(0, Math.min(1, (rate - lo) / Math.max(1e-6, hi - lo)));
-  // sage -> amber -> clay, kept muted so a dense map does not shout
-  const stops: [number, number, number][] = [[191, 220, 162], [237, 207, 151], [222, 150, 118]];
+  // green -> amber -> red (govt functional palette), muted for dense map
+  const stops: [number, number, number][] = [[105, 187, 124], [255, 214, 102], [230, 57, 70]];
   const i = t < 0.5 ? 0 : 1;
   const u = t < 0.5 ? t * 2 : (t - 0.5) * 2;
   const c = stops[i].map((v, k) => Math.round(v + (stops[i + 1][k] - v) * u));

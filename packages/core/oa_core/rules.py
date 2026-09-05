@@ -8,8 +8,11 @@ Two reasons this exists:
      the report says so instead of silently trusting the model.
 
 `source` strings are placeholders the team must replace with the exact citation
-used in the final report. Do NOT present these cutoffs as validated until the
-dataset-fitted values from scripts/fit_thresholds.py replace them.
+used in the final report. The curated reference list lives in
+`docs/research.md` (§ 3, Peer-Reviewed References); until a rule is tied to one
+of those by number, keep `source` at "TODO: cite" — never present it as
+validated. Do NOT present these cutoffs as validated until the dataset-fitted
+values from scripts/fit_thresholds.py replace them.
 """
 from __future__ import annotations
 

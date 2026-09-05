@@ -34,7 +34,6 @@ function checkEngine(label, extract, toVector, rt) {
     const session = {
       walk: { fs: fx.fs_imu, ...c.walk },
       sts: { fs: fx.fs_imu, ...c.sts },
-      vag: { fs: fx.fs_mic, mic: c.vag },
     };
     const got = extract(session, c.intake);
 

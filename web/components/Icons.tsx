@@ -14,8 +14,6 @@ export const IcScreen = (p: P) => (<Base {...p}><rect x="4" y="1.5" width="8" he
 export const IcKit = (p: P) => (<Base {...p}><rect x="1.8" y="4.5" width="12.4" height="7" rx="1.6"/><path d="M4.6 4.5V3.2M11.4 4.5V3.2M5 8h1.6M9.4 8H11"/></Base>);
 export const IcDash = (p: P) => (<Base {...p}><path d="M2 13.2h12"/><path d="M4 13V8.4M7.3 13V4.6M10.6 13V7M13.6 13V10"/></Base>);
 export const IcRegistry = (p: P) => (<Base {...p}><rect x="2.2" y="2.2" width="11.6" height="11.6" rx="1.6"/><path d="M2.2 6h11.6M6 6v7.8"/></Base>);
-export const IcModel = (p: P) => (<Base {...p}><circle cx="8" cy="3.4" r="1.7"/><circle cx="3.4" cy="12" r="1.7"/><circle cx="12.6" cy="12" r="1.7"/><path d="M6.9 4.8 4.5 10.4M9.1 4.8l2.4 5.6M5.1 12h5.8"/></Base>);
-export const IcSystem = (p: P) => (<Base {...p}><rect x="2" y="2.2" width="12" height="4" rx="1.2"/><rect x="2" y="9.8" width="12" height="4" rx="1.2"/><path d="M8 6.2v3.6"/></Base>);
 export const IcWifi = (p: P) => (<Base {...p}><path d="M1.6 5.6a9 9 0 0 1 12.8 0"/><path d="M4 8.2a5.6 5.6 0 0 1 8 0"/><path d="M6.4 10.8a2.3 2.3 0 0 1 3.2 0"/><circle cx="8" cy="13" r=".7" fill="currentColor"/></Base>);
 export const IcWifiOff = (p: P) => (<Base {...p}><path d="M2 2l12 12"/><path d="M1.6 5.6a9 9 0 0 1 3.6-2.2M10.4 3a9 9 0 0 1 4 2.6"/><path d="M4 8.2a5.6 5.6 0 0 1 2-1.3M11.4 7.4c.2.2.4.5.6.8"/><circle cx="8" cy="13" r=".7" fill="currentColor"/></Base>);
 export const IcSync = (p: P) => (<Base {...p}><path d="M13.6 7A5.6 5.6 0 0 0 3.3 4.6"/><path d="M2.4 9A5.6 5.6 0 0 0 12.7 11.4"/><path d="M2.6 2.2v2.6h2.6M13.4 13.8v-2.6h-2.6"/></Base>);

@@ -147,13 +147,19 @@ def main():
 
     # ---- ablation: what does the hardware actually buy us? ----------------
     names = F.FEATURE_NAMES
+    # Feature-source groups derived from FEATURE_NAMES order, NOT hardcoded
+    # index ranges — ordering drift must not silently change what an ablation row
+    # means. Gait is everything before the first STS feature; STS is everything
+    # before the first intake feature.
+    gait_end = names.index("sts_total_s")
+    sts_end = names.index("age")
     groups = {
         "intake only (no kit)": [i for i, n in enumerate(names) if n in F.INTAKE_FEATURES],
         "intake + gait": [i for i, n in enumerate(names)
-                          if n in F.INTAKE_FEATURES or i < 11],
+                          if n in F.INTAKE_FEATURES or i < gait_end],
         "intake + gait + STS": [i for i, n in enumerate(names)
-                                if n in F.INTAKE_FEATURES or i < 17],
-        "full kit (+ acoustic)": list(range(len(names))),
+                                if n in F.INTAKE_FEATURES or i < sts_end],
+        "full kit (gait + STS + intake)": list(range(len(names))),
     }
     ablation = {}
     for label, cols in groups.items():
@@ -267,13 +273,12 @@ def main():
                   for k in ("knee_angle", "shank_gyro", "thigh_gyro", "shank_acc")},
             sts={k: [float(v) for v in sess["sts"][k]]
                  for k in ("thigh_gyro", "trunk_gyro")},
-            vag=[float(v) for v in sess["vag"]["mic"]],
             expected={k: float(v) for k, v in feats.items()},
             expected_risk=float(m.predict_proba(F.to_vector(feats)[None, :])[0]),
             expected_contrib=[float(v) for v in m.contributions(F.to_vector(feats))[0]],
             expected_bias=float(m.contributions(F.to_vector(feats))[1]),
         ))
-    json.dump(dict(fs_imu=S.FS_IMU, fs_mic=S.FS_MIC, cases=fx),
+    json.dump(dict(fs_imu=S.FS_IMU, cases=fx),
               open(os.path.join(OUT, "parity.json"), "w"), separators=(",", ":"))
 
     for f in ("model.json", "metrics.json", "cohort.json", "parity.json"):

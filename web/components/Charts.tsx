@@ -69,7 +69,7 @@ export function LineChart({ series, height = 190, yLabel, xLabels, yMax, area = 
         {ticks.map((t, i) => (
           <g key={i}>
             <line x1={pad.l} x2={pad.l + iw} y1={Y(t)} y2={Y(t)} stroke="var(--line-soft)" strokeWidth={1} />
-            <text x={pad.l - 7} y={Y(t) + 3.5} textAnchor="end" fontSize={10.5} fill="var(--ink-4)" className="num">
+            <text x={pad.l - 7} y={Y(t) + 3.5} textAnchor="end" fontSize={10.5} fill="var(--ink-3)" className="num">
               {t >= 1000 ? `${(t / 1000).toFixed(t >= 10000 ? 0 : 1)}k` : t % 1 ? t.toFixed(1) : t}
             </text>
           </g>
@@ -89,11 +89,11 @@ export function LineChart({ series, height = 190, yLabel, xLabels, yMax, area = 
         })}
         {xLabels?.map((l, i) =>
           l ? (
-            <text key={i} x={X(i)} y={height - 7} textAnchor="middle" fontSize={10.5} fill="var(--ink-4)">{l}</text>
+            <text key={i} x={X(i)} y={height - 7} textAnchor="middle" fontSize={10.5} fill="var(--ink-3)">{l}</text>
           ) : null
         )}
         {yLabel && (
-          <text x={pad.l - 30} y={pad.t - 2} fontSize={10} fill="var(--ink-4)" className="eyebrow">{yLabel}</text>
+          <text x={pad.l - 30} y={pad.t - 2} fontSize={10} fill="var(--ink-3)" className="eyebrow">{yLabel}</text>
         )}
       </svg>
       {series.length > 1 && (
@@ -156,7 +156,7 @@ export function Donut({ slices, size = 132, thickness = 17, center }: {
             <circle key={s.label} cx={size / 2} cy={size / 2} r={r} fill="none"
                     stroke={s.color} strokeWidth={thickness}
                     strokeDasharray={`${frac * C - 1.6} ${C}`}
-                    strokeDashoffset={-acc * C} strokeLinecap="butt" />
+                    strokeDashoffset={-acc * C} strokeLinecap="round" />
           );
           acc += frac;
           return el;

@@ -31,12 +31,12 @@ export function Stat({ label, value, unit, sub, tone, trend }: {
   return (
     <div className="card card-pad" style={{ background: tone ?? "var(--surface)" }}>
       <div className="eyebrow">{label}</div>
-      <div className="row" style={{ gap: 5, alignItems: "baseline", marginTop: 7 }}>
-        <span className="serif num" style={{ fontSize: 29, lineHeight: 1, letterSpacing: "-0.02em" }}>{value}</span>
+      <div className="row" style={{ gap: 6, alignItems: "baseline", marginTop: 8 }}>
+        <span className="serif num" style={{ fontSize: 30, lineHeight: 1, letterSpacing: "-0.02em" }}>{value}</span>
         {unit && <span className="small dim" style={{ fontWeight: 500 }}>{unit}</span>}
         {trend}
       </div>
-      {sub && <div className="tiny dim" style={{ marginTop: 7, lineHeight: 1.45 }}>{sub}</div>}
+      {sub && <div className="tiny dim" style={{ marginTop: 8, lineHeight: 1.5 }}>{sub}</div>}
     </div>
   );
 }
@@ -85,7 +85,7 @@ export function SimBadge({ what, why, compact }: { what: string; why?: string; c
         <circle cx="8" cy="8" r="6.3" /><path d="M8 5v3.6M8 11h.01" strokeLinecap="round" />
       </svg>
       <div style={{ fontSize: 12.3, lineHeight: 1.5 }}>
-        <strong style={{ fontWeight: 620 }}>{what}</strong>
+        <strong style={{ fontWeight: 600 }}>{what}</strong>
         {why && <span> — {why}</span>}
       </div>
     </div>
@@ -97,10 +97,10 @@ export function Section({ title, sub, right, children }: {
 }) {
   return (
     <section style={{ marginTop: 30 }}>
-      <div className="between" style={{ marginBottom: 12, gap: 16 }}>
+      <div className="between" style={{ marginBottom: 14, gap: 16 }}>
         <div>
           <h2>{title}</h2>
-          {sub && <div className="small dim" style={{ marginTop: 3, maxWidth: 720, lineHeight: 1.5 }}>{sub}</div>}
+          {sub && <div className="small dim" style={{ marginTop: 4, maxWidth: 720, lineHeight: 1.55 }}>{sub}</div>}
         </div>
         {right}
       </div>
@@ -113,11 +113,11 @@ export function PageHead({ eyebrow, title, lead, right }: {
   eyebrow: string; title: string; lead?: React.ReactNode; right?: React.ReactNode;
 }) {
   return (
-    <header className="between" style={{ gap: 24, alignItems: "flex-start", marginBottom: 22 }}>
+    <header className="between" style={{ gap: 28, alignItems: "flex-start", marginBottom: 24 }}>
       <div style={{ minWidth: 0 }}>
-        <div className="eyebrow" style={{ marginBottom: 7 }}>{eyebrow}</div>
+        <div className="eyebrow" style={{ marginBottom: 8 }}>{eyebrow}</div>
         <h1 className="serif">{title}</h1>
-        {lead && <p className="muted" style={{ marginTop: 9, maxWidth: 760, fontSize: 14.2, lineHeight: 1.6 }}>{lead}</p>}
+        {lead && <p className="muted" style={{ marginTop: 10, maxWidth: 780, fontSize: 14.5, lineHeight: 1.65 }}>{lead}</p>}
       </div>
       {right && <div style={{ flex: "0 0 auto" }}>{right}</div>}
     </header>

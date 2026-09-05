@@ -13,6 +13,7 @@ import { Card, CardHead, Chip, SimBadge, Section, PageHead, Bar } from "@/compon
 import { Scope } from "@/components/Scope";
 import { IcBluetooth, IcBattery, IcCheck, IcAlert, IcPlay, IcPause, IcKit } from "@/components/Icons";
 import { int, num } from "@/lib/store";
+import { useI18n } from "@/lib/i18n";
 import { Rng, synthWalk } from "@/lib/dsp/simulator";
 import {
   encodeImuFrame, decodeImuFrame, hex, crc16, POWER_BUDGET,
@@ -22,6 +23,7 @@ import {
 const BATTERY_MAH = 2600;
 
 export default function KitConsole() {
+  const { t } = useI18n();
   const [running, setRunning] = React.useState(true);
   const [tick, setTick] = React.useState(0);
   const [dropped, setDropped] = React.useState(0);
@@ -74,7 +76,7 @@ export default function KitConsole() {
   return (
     <>
       <TopBar
-        title="Kit console"
+        title={t("nav.kit")}
         right={
           <>
             <Chip tone="chip-sky"><IcBluetooth size={11} />SANDHI-K1</Chip>
@@ -102,10 +104,14 @@ export default function KitConsole() {
         />
 
         {/* ------------------------------------------------- device head -- */}
+        <div style={{ marginTop: 16 }}>
+          <DeviceModule running={running} dropped={dropped} corrupt={corrupt} total={totalFrames} />
+        </div>
         <div className="grid g4" style={{ marginTop: 16 }}>
           <DeviceStat label="Link" value="Connected" sub="−58 dBm · 15 ms interval" tone="var(--sky-bg)"
                       icon={<IcBluetooth size={14} />} />
-          <DeviceStat label="Frames received" value={int(totalFrames)} sub={`${dropped} dropped · ${corrupt} CRC fail`}
+          <DeviceStat label="Frames received" value={int(totalFrames)}
+                      sub={<>{dropped > 0 && <em className="live-bad">{dropped} dropped</em>}{corrupt > 0 && <em className="live-bad">{corrupt} CRC fail</em>}{(dropped === 0 && corrupt === 0) && <span className="dim">zero drops · all CRC valid</span>}</>}
                       tone="var(--lilac-bg)" />
           <DeviceStat label="Battery" value="86%" sub={`${int(BATTERY_MAH)} mAh · ~${sessionsPerCharge} screenings left`}
                       tone="var(--sage-bg)" icon={<IcBattery size={14} />} />
@@ -311,7 +317,7 @@ export default function KitConsole() {
 }
 
 function DeviceStat({ label, value, sub, tone, icon }: {
-  label: string; value: React.ReactNode; sub: string; tone: string; icon?: React.ReactNode;
+  label: string; value: React.ReactNode; sub: React.ReactNode; tone: string; icon?: React.ReactNode;
 }) {
   return (
     <div className="card card-pad" style={{ background: tone }}>
@@ -321,6 +327,85 @@ function DeviceStat({ label, value, sub, tone, icon }: {
       </div>
       <div className="serif num" style={{ fontSize: 22, marginTop: 5, lineHeight: 1 }}>{value}</div>
       <div className="tiny dim" style={{ marginTop: 5 }}>{sub}</div>
+    </div>
+  );
+}
+
+/* A physical knee + two sensor cuffs, with a BLE pairing arc up to the phone.
+   The device edge glows and an arc pulses while frames stream. */
+function DeviceModule({ running, dropped, corrupt, total }: {
+  running: boolean; dropped: number; corrupt: number; total: number;
+}) {
+  return (
+    <div className="card" style={{ overflow: "hidden", position: "relative" }}>
+      <div className={`device-stage ${running ? "live" : ""}`}>
+        {/* pairing arc + phone */}
+        <svg width="60" height="120" viewBox="0 0 60 120" style={{ flex: "0 0 60px" }} aria-hidden>
+          <path d="M30 118 Q2 60 30 6" fill="none" stroke="var(--sky-ink)" strokeWidth="2" strokeDasharray="5 4"
+                strokeLinecap="round" className={running ? "arc-anim" : ""} />
+          <circle cx="30" cy="6" r="6" fill="var(--surface-2)" stroke="var(--sky-ink)" strokeWidth="1.4" />
+          <circle cx="30" cy="6" r="2" fill={running ? "var(--sky-ink)" : "var(--ink-3)"} className={running ? "pulse" : ""} />
+          <text x="2" y="66" fontSize="9" fill="var(--ink-3)" transform="rotate(-90 2 66)" textAnchor="middle"
+                letterSpacing=".1em">BLE 4.2 · notify</text>
+        </svg>
+
+        {/* the attached device on a knee */}
+        <div style={{ position: "relative" }}>
+          <svg width="150" height="170" viewBox="0 0 150 170" fill="none" aria-hidden>
+            {/* femur */}
+            <path d="M62 8c-4 18-6 30-4 44" stroke="var(--ink-4)" strokeWidth="4" strokeLinecap="round" />
+            {/* tibia */}
+            <path d="M50 58c4 12 9 22 15 30" stroke="var(--ink-4)" strokeWidth="5" strokeLinecap="round" />
+            {/* joint */}
+            <circle cx="56" cy="56" r="9" fill="var(--surface-3)" stroke="var(--ink-3)" strokeWidth="1.4" />
+            <path d="M47 56c6 2 13 2 18-5" stroke="var(--clay-ink)" strokeWidth="1.6" strokeLinecap="round" />
+
+            {/* thigh cuff */}
+            <rect x="50" y="22" width="34" height="12" rx="6" fill="var(--sky-bg)" stroke="var(--sky-ink)" strokeWidth="1.4"
+                  className="device-edge" />
+            <circle cx="60" cy="28" r="2.1" fill="var(--sky-ink)" />
+            <circle cx="68" cy="28" r="2.1" fill="var(--sky-ink)" />
+            <circle cx="76" cy="28" r="2.1" fill="var(--sky-ink)" />
+
+            {/* shin cuff */}
+            <rect x="38" y="72" width="34" height="12" rx="6" fill="var(--lilac-bg)" stroke="var(--lilac-ink)" strokeWidth="1.4"
+                  className="device-edge" />
+            <circle cx="48" cy="78" r="2.1" fill="var(--lilac-ink)" />
+            <circle cx="56" cy="78" r="2.1" fill="var(--lilac-ink)" />
+            <circle cx="64" cy="78" r="2.1" fill="var(--lilac-ink)" />
+          </svg>
+        </div>
+
+        {/* status column */}
+        <div style={{ flex: "1 1 200px", minWidth: 180 }}>
+          <div className="between">
+            <span className="eyebrow">SANDHI-K1 · strapped</span>
+            <Chip tone={running ? "chip-sage" : "chip-amber"}>
+              <span className={`dot ${running ? "pulse" : ""}`} />{running ? "streaming" : "paused"}
+            </Chip>
+          </div>
+          <div className="row" style={{ gap: 16, marginTop: 10 }}>
+            <Mini label="Frames" value={int(total)} />
+            <Mini label="Drops" value={dropped} bad={dropped > 0} />
+            <Mini label="CRC fails" value={corrupt} bad={corrupt > 0} />
+            <Mini label="RSSI" value="−58 dBm" />
+          </div>
+          <div className="tiny dim" style={{ marginTop: 10, lineHeight: 1.55 }}>
+            Two MPU-6050 IMUs on thigh and shin cuffs, 100 Hz each. The edge glow and the
+            BLE arc pulse in time with the emulated 15 ms connection interval — a failed CRC
+            blinks the counter instead of being silently swallowed.
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Mini({ label, value, bad }: { label: string; value: React.ReactNode; bad?: boolean }) {
+  return (
+    <div>
+      <div className="eyebrow" style={{ fontSize: 9.6 }}>{label}</div>
+      <div className={`serif num ${bad ? "live-bad" : ""}`} style={{ fontSize: 20, marginTop: 2, lineHeight: 1 }}>{value}</div>
     </div>
   );
 }

@@ -13,10 +13,8 @@
  */
 
 export const FS_IMU = 100;
-export const FS_MIC = 4000;
 export const WALK_SECONDS = 30;
 export const STS_REPS = 5;
-export const VAG_SECONDS = 6;
 
 /* --------------------------------------------- seeded PRNG (mulberry32) --- */
 export class Rng {
@@ -240,48 +238,6 @@ export function synthSts(rng: Rng, sev: number, nz: Partial<Nuisance> = {}) {
 
 /* ---------------------------------------------------------------- VAG ---- */
 
-export function synthVag(rng: Rng, sev: number, coupling = 1) {
-  const n = VAG_SECONDS * FS_MIC;
-  const white = new Float64Array(n);
-  for (let i = 0; i < n; i++) white[i] = rng.normal(0, 1);
-
-  const conv = (w: number) => {
-    const out = new Float64Array(n);
-    const half = Math.floor(w / 2);
-    const pre = new Float64Array(n + 1);
-    for (let i = 0; i < n; i++) pre[i + 1] = pre[i] + white[i];
-    for (let i = 0; i < n; i++) {
-      const lo = Math.max(0, i - half);
-      const hi = Math.min(n, w % 2 === 0 ? i + half : i + half + 1);
-      out[i] = (pre[hi] - pre[lo]) / w;
-    }
-    return out;
-  };
-  const lp = conv(64), mid = conv(12);
-
-  const x = new Float64Array(n);
-  for (let i = 0; i < n; i++) {
-    const t = i / FS_MIC;
-    x[i] = 0.085 * lp[i] + 0.012 * mid[i] + 0.0016 * white[i]
-      + 0.055 * Math.sin(2 * Math.PI * 0.55 * t)
-      + 0.03 * Math.sin(2 * Math.PI * 1.4 * t + 1.1);
-  }
-
-  const nBursts = rng.poisson(1 + 26 * Math.pow(sev, 1.55));
-  const bursts: { at: number; f: number; amp: number; dur: number }[] = [];
-  for (let b = 0; b < nBursts; b++) {
-    const c = rng.int(0, n - 400);
-    const dur = rng.int(28, 190);
-    const f = rng.uniform(230, 1350) * (1 + 0.35 * sev);
-    const amp = (0.03 + 0.115 * sev) * rng.uniform(0.5, 1.6) * coupling;
-    for (let d = 0; d < dur; d++) {
-      x[c + d] += amp * Math.exp(-d / (dur / 3.1)) * Math.sin((2 * Math.PI * f * d) / FS_MIC);
-    }
-    bursts.push({ at: c / FS_MIC, f, amp, dur });
-  }
-  return { mic: x, fs: FS_MIC, _bursts: bursts };
-}
-
 export function synthSession(rng: Rng, subj: Subject) {
   const nuisance: Nuisance = {
     gyro_gain: clamp(rng.normal(1, 0.055), 0.8, 1.2),
@@ -291,7 +247,6 @@ export function synthSession(rng: Rng, subj: Subject) {
   return {
     walk: synthWalk(rng, subj._sevFunc, nuisance),
     sts: synthSts(rng, subj._sevFunc, nuisance),
-    vag: synthVag(rng, subj._sevVag, subj._coupling),
     nuisance,
   };
 }

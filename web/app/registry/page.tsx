@@ -4,17 +4,20 @@ import { TopBar } from "@/components/Shell";
 import { Card, CardHead, Chip, SimBadge, PageHead, Skeleton } from "@/components/ui";
 import { IcFilter, IcClose, IcCheck, IcSync, IcChevron, IcUser } from "@/components/Icons";
 import {
-  useSandhi, pct, int, num, formatFeature, BAND_LABEL, BAND_CHIP, BAND_VAR,
-  FEATURE_LABEL, FEATURE_UNIT, CHANNEL_LABEL, CHANNEL_CHIP, type CohortRecord,
+  useSandhi, pct, int, formatFeature, BAND_LABEL, BAND_CHIP, BAND_VAR,
+  FEATURE_LABEL, FEATURE_UNIT, FEATURE_HINT, CHANNEL_LABEL, CHANNEL_CHIP, type CohortRecord,
 } from "@/lib/store";
 import { FEATURE_CHANNEL, FEATURE_NAMES } from "@/lib/dsp/features";
+import { useI18n } from "@/lib/i18n";
 import { explain, predict } from "@/lib/model/runtime";
+import PrintReport from "@/components/PrintReport";
 
 type SortKey = "risk" | "age" | "days_ago" | "name" | "womac_pain";
 const PAGE = 25;
 
 export default function Registry() {
   const { cohort, model, metrics, outbox } = useSandhi();
+  const { t } = useI18n();
   const [q, setQ] = React.useState("");
   const [band, setBand] = React.useState("all");
   const [state, setState] = React.useState("all");
@@ -23,6 +26,11 @@ export default function Registry() {
   const [asc, setAsc] = React.useState(false);
   const [page, setPage] = React.useState(0);
   const [open, setOpen] = React.useState<CohortRecord | null>(null);
+  const [cols, setCols] = React.useState<Record<string, boolean>>({
+    name: true, district: true, age: true, sex: true, bmi: true,
+    work: true, pain: true, risk: true, band: true, screened: true, sync: true,
+  });
+  const [colMenu, setColMenu] = React.useState(false);
 
   const states = React.useMemo(
     () => (cohort ? Array.from(new Set(cohort.records.map((r) => r.state))).sort() : []),
@@ -53,7 +61,7 @@ export default function Registry() {
   React.useEffect(() => setPage(0), [q, band, state, sync, sort, asc]);
 
   if (!cohort || !model) {
-    return (<><TopBar title="Registry" /><div className="page"><Skeleton h={320} /></div></>);
+    return (<><TopBar title={t("nav.registry")} /><div className="page"><Skeleton h={320} /></div></>);
   }
 
   const pageRows = rows.slice(page * PAGE, page * PAGE + PAGE);
@@ -76,7 +84,7 @@ export default function Registry() {
 
   return (
     <>
-      <TopBar title="Registry" right={<Chip>{int(rows.length)} of {int(cohort.records.length)}</Chip>} />
+      <TopBar title={t("nav.registry")} right={<Chip>{int(rows.length)} of {int(cohort.records.length)}</Chip>} />
       <div className="page page-wide">
         <PageHead
           eyebrow="Layer 3 — patient registry"
@@ -110,6 +118,35 @@ export default function Registry() {
                 <option value="synced">Synced</option><option value="pending">Pending</option>
               </select>
             </div>
+            <div style={{ position: "relative" }}>
+              <button className="btn" onClick={() => setColMenu((m) => !m)} aria-expanded={colMenu}>
+                Columns
+                {Object.values(cols).filter(Boolean).length < 11 && (
+                  <span className="chip chip-sky" style={{ marginLeft: 6 }}>{Object.values(cols).filter(Boolean).length}</span>
+                )}
+              </button>
+              {colMenu && (
+                <>
+                  <div style={{ position: "fixed", inset: 0, zIndex: 9 }} onClick={() => setColMenu(false)} />
+                  <div className="card" style={{
+                    position: "absolute", right: 0, top: 42, zIndex: 10, width: 220,
+                    padding: "8px 10px", boxShadow: "var(--sh-pop)",
+                  }}>
+                    <div className="tiny faint" style={{ padding: "4px 6px 6px" }}>Show columns</div>
+                    {Object.entries({
+                      name: "Name", district: "District", age: "Age", sex: "Sex", bmi: "BMI",
+                      work: "Work", pain: "Pain", risk: "Risk", band: "Band", screened: "Screened", sync: "Sync",
+                    }).map(([k, label]) => (
+                      <label key={k} className="row" style={{ gap: 8, padding: "5px 6px", cursor: "pointer" }}>
+                        <input type="checkbox" checked={cols[k] === true}
+                               onChange={() => setCols((c) => ({ ...c, [k]: !c[k] }))} />
+                        <span style={{ fontSize: 12.8 }}>{label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
 
           <div style={{ overflowX: "auto" }}>
@@ -117,17 +154,17 @@ export default function Registry() {
               <thead>
                 <tr>
                   <th style={{ width: 92 }}>ID</th>
-                  {th("name", "Name")}
-                  <th>District</th>
-                  {th("age", "Age", true)}
-                  <th className="rt">Sex</th>
-                  <th className="rt">BMI</th>
-                  <th>Work</th>
-                  {th("womac_pain", "Pain", true)}
-                  {th("risk", "Risk", true)}
-                  <th>Band</th>
-                  {th("days_ago", "Screened", true)}
-                  <th>Sync</th>
+                  {cols.name && th("name", "Name")}
+                  {cols.district && <th>District</th>}
+                  {cols.age && th("age", "Age", true)}
+                  {cols.sex && <th className="rt">Sex</th>}
+                  {cols.bmi && <th className="rt">BMI</th>}
+                  {cols.work && <th>Work</th>}
+                  {cols.pain && th("womac_pain", "Pain", true)}
+                  {cols.risk && th("risk", "Risk", true)}
+                  {cols.band && <th>Band</th>}
+                  {cols.screened && th("days_ago", "Screened", true)}
+                  {cols.sync && <th>Sync</th>}
                   <th style={{ width: 26 }} />
                 </tr>
               </thead>
@@ -137,19 +174,19 @@ export default function Registry() {
                   return (
                     <tr key={r.id} onClick={() => setOpen(r)}>
                       <td className="mono dim">{r.id}</td>
-                      <td style={{ fontWeight: 540, whiteSpace: "nowrap" }}>{r.name}</td>
-                      <td className="dim" style={{ whiteSpace: "nowrap" }}>{d?.name ?? r.district}</td>
-                      <td className="rt num">{r.age.toFixed(0)}</td>
-                      <td className="rt dim">{r.sex}</td>
-                      <td className="rt num">{r.bmi.toFixed(1)}</td>
-                      <td className="dim tiny" style={{ whiteSpace: "nowrap" }}>{r.occupation}</td>
-                      <td className="rt num">{r.womac_pain.toFixed(0)}</td>
-                      <td className="rt num" style={{ fontWeight: 600 }}>{pct(r.risk, 0)}</td>
-                      <td><span className={`chip ${BAND_CHIP[r.band]}`}>{BAND_LABEL[r.band]}</span></td>
-                      <td className="rt dim tiny" style={{ whiteSpace: "nowrap" }}>{r.days_ago}d ago</td>
-                      <td>{r.synced
+                      {cols.name && <td style={{ fontWeight: 540, whiteSpace: "nowrap" }}>{r.name}</td>}
+                      {cols.district && <td className="dim" style={{ whiteSpace: "nowrap" }}>{d?.name ?? r.district}</td>}
+                      {cols.age && <td className="rt num">{r.age.toFixed(0)}</td>}
+                      {cols.sex && <td className="rt dim">{r.sex}</td>}
+                      {cols.bmi && <td className="rt num">{r.bmi.toFixed(1)}</td>}
+                      {cols.work && <td className="dim tiny" style={{ whiteSpace: "nowrap" }}>{r.occupation}</td>}
+                      {cols.pain && <td className="rt num">{r.womac_pain.toFixed(0)}</td>}
+                      {cols.risk && <td className="rt num" style={{ fontWeight: 600 }}>{pct(r.risk, 0)}</td>}
+                      {cols.band && <td><span className={`chip ${BAND_CHIP[r.band]}`}>{BAND_LABEL[r.band]}</span></td>}
+                      {cols.screened && <td className="rt dim tiny" style={{ whiteSpace: "nowrap" }}>{r.days_ago}d ago</td>}
+                      {cols.sync && <td>{r.synced
                         ? <IcCheck size={13} style={{ color: "var(--sage-ink)" }} />
-                        : <IcSync size={13} style={{ color: "var(--amber-ink)" }} />}</td>
+                        : <IcSync size={13} style={{ color: "var(--amber-ink)" }} />}</td>}
                       <td><IcChevron size={12} style={{ color: "var(--ink-4)" }} /></td>
                     </tr>
                   );
@@ -224,7 +261,10 @@ function RecordDrawer({ record, onClose, model, district }: {
               <div className="tiny dim mono">{record.id}</div>
             </div>
           </div>
-          <button className="btn btn-sm btn-ghost" onClick={onClose}><IcClose size={13} /></button>
+          <div className="row" style={{ gap: 6 }}>
+            <button className="btn btn-sm" onClick={() => window.print()}>Print / PDF</button>
+            <button className="btn btn-sm btn-ghost" onClick={onClose}><IcClose size={13} /></button>
+          </div>
         </div>
 
         <div style={{ padding: "18px 20px 44px" }} className="stack">
@@ -316,8 +356,12 @@ function RecordDrawer({ record, onClose, model, district }: {
                         <div key={k} style={{
                           padding: "5px 8px", borderRadius: "var(--r-xs)",
                           background: "var(--surface-2)", border: "1px solid var(--line-soft)",
-                        }}>
-                          <div className="tiny dim" style={{ lineHeight: 1.2 }}>{FEATURE_LABEL[k]}</div>
+                          cursor: FEATURE_HINT[k] ? "help" : undefined,
+                        }} title={FEATURE_HINT[k]}>
+                          <div className="tiny dim" style={{ lineHeight: 1.2 }}>
+                            {FEATURE_LABEL[k]}
+                            {FEATURE_HINT[k] && <span className="faint" style={{ marginLeft: 3 }}>ⓘ</span>}
+                          </div>
                           <div className="num" style={{ fontWeight: 560, fontSize: 12.6 }}>
                             {formatFeature(k, record.features[k])}{" "}
                             <span className="tiny faint" style={{ fontWeight: 400 }}>{FEATURE_UNIT[k]}</span>
@@ -335,6 +379,16 @@ function RecordDrawer({ record, onClose, model, district }: {
               the field build — it does not exist for a real patient.
             </div>
           </Card>
+
+          <PrintReport
+            patient={record.name}
+            district={district?.name ?? record.district}
+            date={new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+            risk={recomputed}
+            band={record.band}
+            bands={model.bands}
+            top={top.slice(0, 8)}
+          />
         </div>
       </aside>
     </>

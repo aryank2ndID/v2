@@ -244,6 +244,34 @@ class GBM:
             "trees": [enc(t) for t in self.trees],
         }
 
+    @classmethod
+    def from_json(cls, doc: dict) -> "GBM":
+        """:class:`GBM` reconstructed from a :meth:`to_json` document.
+
+        Tree thresholds are embedded as full-precision floats, so a rebuilt
+        model predicts bit-identically to the trainer for any input in the
+        trained feature space. This is the loader the sync server uses to
+        cross-check phone-reported risk against the same artifact the phone
+        ships.
+        """
+        m = cls(n_trees=len(doc["trees"]), lr=doc["lr"], seed=0)
+        m.n_features = len(doc["features"])
+        m.base = doc["base"]
+        m.bin_edges = [[] for _ in range(m.n_features)]
+
+        def dec(nd: dict) -> Node:
+            if "l" in nd:
+                node = Node()
+                node.feat, node.thr, node.value = nd["f"], nd["t"], nd["v"]
+                node.left, node.right = dec(nd["l"]), dec(nd["r"])
+                return node
+            node = Node()
+            node.value = nd["v"]
+            return node
+
+        m.trees = [dec(t) for t in doc["trees"]]
+        return m
+
 
 # ------------------------------------------------------------- metrics ----
 

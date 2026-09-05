@@ -24,4 +24,6 @@ packages/app/.parity/
 server/server
 web/.next/
 web/out/
+web/.parity/
+*.tsbuildinfo
 *.log

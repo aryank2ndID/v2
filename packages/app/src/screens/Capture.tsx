@@ -12,7 +12,6 @@ import { Button, Card, ProgressBar, Screen, Title, Wave } from "../ui";
 const PHASES: { key: Phase; ui: string; sec: number }[] = [
   { key: "walk", ui: "ui.phase_walk", sec: 30 },
   { key: "sts", ui: "ui.phase_sts", sec: 15 },
-  { key: "vag", ui: "ui.phase_vag", sec: 6 },
 ];
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -74,8 +73,7 @@ export function CaptureScreen({
   function showSimSnippet(key: Phase) {
     if (!simSession) return;
     if (key === "walk") setWaveVals(toBars(simSession.walk.knee_angle, 3, 100));
-    else if (key === "sts") setWaveVals(toBars(simSession.sts.thigh_gyro, 3, 100));
-    else setWaveVals(toBars(simSession.vag.mic, 0.1, 4000));
+    else setWaveVals(toBars(simSession.sts.thigh_gyro, 3, 100));
   }
 
   async function runPhase(key: Phase) {
@@ -97,11 +95,7 @@ export function CaptureScreen({
         const t0 = Date.now();
         const interval = setInterval(() => setProgress(Math.min(1, (Date.now() - t0) / total)), 100);
         try {
-          if (key === "vag") {
-            await recorder.waitAcousticDone(15_000);
-          } else {
-            await sleep(total);
-          }
+          await sleep(total);
         } finally {
           clearInterval(interval);
         }
@@ -124,7 +118,7 @@ export function CaptureScreen({
   return (
     <Screen>
       <Title sub="Run each block. The app scores only blocks it actually captured.">
-        3-step test
+        2-step test
       </Title>
 
       <Card>
@@ -189,13 +183,11 @@ export function CaptureScreen({
             session = {
               walk: simSession.walk,
               sts: simSession.sts,
-              vag: simSession.vag,
             };
           } else {
             session = {
               walk: recorder.walkSignal(),
               sts: recorder.stsSignal(),
-              vag: recorder.vagSignal(),
             };
           }
           onComplete(session);

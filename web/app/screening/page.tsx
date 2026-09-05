@@ -12,18 +12,20 @@ import * as React from "react";
 import { TopBar } from "@/components/Shell";
 import { Card, CardHead, Chip, SimBadge } from "@/components/ui";
 import { PhoneFrame } from "@/components/PhoneFrame";
-import { Scope, SpectrumStrip } from "@/components/Scope";
+import { Scope } from "@/components/Scope";
 import {
   IcArrow, IcCheck, IcBluetooth, IcBattery, IcWifi, IcWifiOff, IcPlay,
   IcSync, IcUser, IcSpark,
 } from "@/components/Icons";
 import {
   useSandhi, pct, int, BAND_LABEL, BAND_VAR, BAND_BG, formatFeature,
-  FEATURE_LABEL, FEATURE_UNIT, CHANNEL_LABEL, CHANNEL_CHIP,
+  FEATURE_LABEL, FEATURE_UNIT, FEATURE_HINT, CHANNEL_LABEL, CHANNEL_CHIP,
 } from "@/lib/store";
+import { useI18n } from "@/lib/i18n";
 import { Rng, OCCUPATIONS, synthWalk, synthSts, type Nuisance } from "@/lib/dsp/simulator";
 import { extract, toVector, gaitFeatures, stsFeatures } from "@/lib/dsp/features";
 import { predict, bandOf, explain, contributions } from "@/lib/model/runtime";
+import PrintReport from "@/components/PrintReport";
 
 type Step = "intake" | "fit" | "capture" | "result";
 type Phase = "idle" | "walk" | "sts" | "infer" | "done";
@@ -55,6 +57,7 @@ const PRESETS: { label: string; hint: string; v: Partial<Intake>; sev: number }[
 
 export default function Screening() {
   const { model, cohort, online, enqueue, flush } = useSandhi();
+  const { t: tr } = useI18n();
   const [step, setStep] = React.useState<Step>("intake");
   const [intake, setIntake] = React.useState<Intake>(BLANK);
   const [presetSev, setPresetSev] = React.useState<number | null>(null);
@@ -184,7 +187,7 @@ export default function Screening() {
   return (
     <>
       <TopBar
-        title="Screening"
+        title={tr("nav.screening")}
         right={
           <>
             <Chip tone="chip-lilac">on-device</Chip>
@@ -225,7 +228,9 @@ export default function Screening() {
               )}
               {step === "result" && model && result && (
                 <ResultScreen result={result} intake={intake} reset={reset} commit={commit}
-                              queued={queued} online={online} flush={flush} model={model} />
+                              queued={queued} online={online} flush={flush} model={model}
+                              captureSeconds={totalSeconds} bmi={bmi} occ={occ}
+                              onPrint={() => window.print()} />
               )}
             </div>
           </PhoneFrame>
@@ -233,7 +238,7 @@ export default function Screening() {
           <div className="grow stack" style={{ gap: 14, minWidth: 0 }}>
             <SimBadge
               what="Sensor stream is emulated."
-              why="No ESP32 is attached. Waveforms come from lib/dsp/simulator.ts at the real sampling rates (IMU 100 Hz, piezo 4 kHz). Everything downstream — feature extraction, the model, the outbox — is the production path."
+              why="No ESP32 is attached. Waveforms come from lib/dsp/simulator.ts at the real sampling rate (IMU 100 Hz). Everything downstream — feature extraction, the model, the outbox — is the production path."
             />
 
             <div className="grid g3">
@@ -285,6 +290,18 @@ export default function Screening() {
 
             <LiveFeatures phase={phase} session={session} sampleIdx={sampleIdx} result={result} />
             {result && model && <WhyPanel result={result} model={model} />}
+            {result && (
+              <PrintReport
+                patient={intake.name || "Unnamed patient"}
+                district={districts.find((d) => d.id === intake.districtId)?.name}
+                date={new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+                risk={result.risk}
+                band={result.band}
+                bands={model?.bands}
+                top={result.top}
+                captureSeconds={totalSeconds}
+              />
+            )}
           </div>
         </div>
         <style>{`@media (max-width: 1140px){ .screen-split{ flex-direction: column } }`}</style>
@@ -367,8 +384,12 @@ function LiveFeatures({ phase, session, sampleIdx, result }: {
                   <div key={k} style={{
                     padding: "6px 9px", borderRadius: "var(--r-xs)",
                     background: "var(--surface-2)", border: "1px solid var(--line-soft)",
-                  }}>
-                    <div className="tiny dim" style={{ lineHeight: 1.25 }}>{FEATURE_LABEL[k]}</div>
+                    cursor: FEATURE_HINT[k] ? "help" : undefined,
+                  }} title={FEATURE_HINT[k]}>
+                    <div className="tiny dim" style={{ lineHeight: 1.25 }}>
+                      {FEATURE_LABEL[k]}
+                      {FEATURE_HINT[k] && <span className="faint" style={{ marginLeft: 3 }}>ⓘ</span>}
+                    </div>
                     <div className="num" style={{ fontWeight: 570, fontSize: 13.5, marginTop: 2 }}>
                       {formatFeature(k, shown[k])}{" "}
                       <span className="tiny faint" style={{ fontWeight: 400 }}>{FEATURE_UNIT[k]}</span>
@@ -760,12 +781,24 @@ const ADVICE: Record<string, { head: string; body: string; action: string }> = {
   },
 };
 
-function ResultScreen({ result, intake, reset, commit, queued, online, flush, model }: {
+function ResultScreen({ result, intake, reset, commit, queued, online, flush, model, captureSeconds, onPrint, bmi, occ }: {
   result: { risk: number; band: "low" | "watch" | "refer"; top: ReturnType<typeof explain> };
   intake: Intake; reset: () => void; commit: () => void; queued: boolean;
   online: boolean; flush: () => void; model: { bands: { low: number; refer: number } };
+  captureSeconds: number; onPrint: () => void;
+  bmi: number; occ: { squat: number; stairs: number };
 }) {
   const a = ADVICE[result.band];
+  /* Mirrors oa_core/guidance.py guidance_keys() so the phone and the model
+     repo give the same person-specific prevention advice. */
+  const guidance: string[] = [];
+  if (bmi >= 25) guidance.push("Reducing body weight lowers the load on the knees.");
+  guidance.push("Walk on level ground and do gentle thigh-strengthening exercises daily.");
+  if (occ.squat >= 2) guidance.push("Avoid deep squatting and sitting cross-legged for long periods.");
+  if (occ.stairs >= 20 || occ.squat >= 2) guidance.push("Break up long slope or stair climbs and reduce carried loads.");
+  if (result.band !== "low") guidance.push("Use cushioned, flat footwear.");
+  if (intake.womac_stiff >= 2) guidance.push("Gentle warmth and slow movement help morning stiffness.");
+  guidance.push("Eat a balanced diet with adequate protein, calcium and vitamin D.");
   const borderFor = result.band === "low" ? "var(--sage-line)"
     : result.band === "watch" ? "var(--amber-line)" : "var(--clay-line)";
   return (
@@ -809,6 +842,18 @@ function ResultScreen({ result, intake, reset, commit, queued, online, flush, mo
         }}>
           <IcArrow size={13} style={{ color: "var(--ink-3)", marginTop: 2, flex: "0 0 13px" }} />
           <span className="tiny" style={{ lineHeight: 1.5, color: "var(--ink-2)" }}>{a.action}</span>
+        </div>
+      </div>
+
+      <div className="card card-quiet" style={{ padding: "11px 13px" }}>
+        <div className="eyebrow" style={{ marginBottom: 7 }}>Preventive guidance — person-specific</div>
+        <div className="stack" style={{ gap: 5 }}>
+          {guidance.map((g, i) => (
+            <div key={i} className="row" style={{ gap: 8, fontSize: 12.2, alignItems: "flex-start" }}>
+              <IcArrow size={12} style={{ color: "var(--ink-3)", marginTop: 2, flex: "0 0 12px" }} />
+              <span style={{ lineHeight: 1.5, color: "var(--ink-2)" }}>{g}</span>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -858,6 +903,7 @@ function ResultScreen({ result, intake, reset, commit, queued, online, flush, mo
           : <button className="btn btn-accent grow" onClick={flush} disabled={!online}>
               <IcSync size={13} />Sync now
             </button>}
+        <button className="btn" onClick={onPrint}>Print / PDF</button>
         <button className="btn" onClick={reset}>New</button>
       </div>
 

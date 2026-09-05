@@ -9,6 +9,7 @@
  */
 import * as React from "react";
 import type { SandhiModel } from "./model/runtime";
+import { genCohort } from "./dsp/cohort";
 
 export interface CohortRecord {
   id: string; name: string; district: string; state: string;
@@ -61,6 +62,7 @@ interface Ctx {
   cohort: Cohort | null;
   online: boolean;
   setOnline: (v: boolean) => void;
+  resampleCohort: (seed: number, n?: number) => void;
   outbox: OutboxItem[];
   enqueue: (i: Omit<OutboxItem, "state" | "id" | "createdAt">) => void;
   flush: () => Promise<void>;
@@ -126,6 +128,19 @@ export function SandhiProvider({ children }: { children: React.ReactNode }) {
     ]);
   }, []);
 
+  const resampleCohort = React.useCallback((seed: number, n = 400) => {
+    setCohort((current) => {
+      if (!current || !model) return current;
+      const districts = current.districts;
+      const out = genCohort({ seed, n, districts }, model);
+      return {
+        bands: current.bands,
+        districts,
+        records: out.records,
+      };
+    });
+  }, [model]);
+
   const flush = React.useCallback(async () => {
     if (!online) return;
     setSyncing(true);
@@ -134,9 +149,13 @@ export function SandhiProvider({ children }: { children: React.ReactNode }) {
       setOutbox((o) => o.map((x) => (x.id === item.id ? { ...x, state: "sending" } : x)));
       let ok = false;
       try {
+        const token = typeof localStorage !== "undefined" ? localStorage.getItem("sandhi.syncToken") : null;
         const r = await fetch("http://localhost:8787/v1/screenings", {
           method: "POST",
-          headers: { "content-type": "application/json" },
+          headers: {
+            "content-type": "application/json",
+            ...(token ? { authorization: `Bearer ${token}` } : {}),
+          },
           body: JSON.stringify({
             client_id: item.id, patient: item.patient, district: item.district,
             risk: item.risk, band: item.band, features: item.features,
@@ -155,7 +174,7 @@ export function SandhiProvider({ children }: { children: React.ReactNode }) {
 
   const value: Ctx = {
     ready: !!(model && metrics && cohort),
-    model, metrics, cohort, online, setOnline, outbox, enqueue, flush, syncing, serverUp, lastSync,
+    model, metrics, cohort, online, setOnline, resampleCohort, outbox, enqueue, flush, syncing, serverUp, lastSync,
   };
   return <C.Provider value={value}>{children}</C.Provider>;
 }
@@ -205,6 +224,37 @@ export const FEATURE_UNIT: Record<string, string> = {
   sts_trunk_lean_dps: "°/s", age: "yr", sex_f: "", bmi: "kg/m²",
   occ_squat_load: "/3", stairs_per_day: "", terrain_slope_idx: "", prior_injury: "",
   family_hx: "", womac_pain: "/20", womac_stiff: "/8",
+};
+
+/** One-line "why it matters" for each feature, used as hover help. */
+export const FEATURE_HINT: Record<string, string> = {
+  cadence_spm: "Steps per minute — people with OA slow down.",
+  stride_time_s: "Time for one full stride cycle.",
+  stride_time_cv_pct: "Variability between strides; pain makes it rise.",
+  stance_pct: "Share of the stride the foot is on the ground.",
+  double_support_pct: "Time both feet are down — rises with instability.",
+  knee_flex_rom_deg: "Knee bend range during the gait cycle.",
+  swing_peak_flex_deg: "Peak knee bend in swing; a stiff OA knee flexes less.",
+  shank_swing_peak_dps: "Shin swing speed; dampened when painful.",
+  heelstrike_impact_g: "Impact spike at heel strike.",
+  step_asym_pct: "Left/right difference — the side with OA bears less.",
+  gait_speed_est_mps: "Estimated walking speed from stride time.",
+  sts_total_s: "Total time for five chair rises.",
+  sts_mean_rep_s: "Average time per single sit-to-stand rep.",
+  sts_peak_angvel_dps: "Peak knee velocity standing up.",
+  sts_smoothness_ldlj: "Smoothness of the rise (log-dimensionless jerk).",
+  sts_rep_cv_pct: "Rep-to-rep variability across the five rises.",
+  sts_trunk_lean_dps: "Forward trunk lean used to help the knees up.",
+  age: "The single strongest OA risk factor.",
+  sex_f: "Females report knee OA at markedly higher rates.",
+  bmi: "Higher load through the joint raises risk.",
+  occ_squat_load: "Occupational squatting/crouching (0–3).",
+  stairs_per_day: "Daily stair use — a proxy for load.",
+  terrain_slope_idx: "How steep the catchment is (NER-specific signal).",
+  prior_injury: "A prior knee injury raises late-onset risk.",
+  family_hx: "Family history of knee OA.",
+  womac_pain: "WOMAC pain subscale (0–20).",
+  womac_stiff: "WOMAC stiffness subscale (0–8).",
 };
 
 /** Renders one feature value the way a person would read it. */
