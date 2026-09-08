@@ -35,6 +35,7 @@ export const LANGS: { code: string; name: string }[] = [
 type Dict = Record<string, string>;
 
 const HI: Dict = {
+  "nav.console": "मेरा कंसोल", "nav.admin": "प्रशासन कंसोल", "nav.signout": "साइन आउट",
   "nav.field": "मैदान", "nav.programme": "कार्यक्रम",
   "nav.overview": "मुख्य पृष्ठ", "nav.screening": "जांच", "nav.kit": "किट कंसोल",
   "nav.dashboard": "जिला डैशबोर्ड", "nav.registry": "रजिस्ट्री",
@@ -49,6 +50,7 @@ const HI: Dict = {
 };
 
 const AS: Dict = {
+  "nav.console": "মোৰ কনছ'ল", "nav.admin": "প্ৰশাসন কনছ'ল", "nav.signout": "ছাইন আউট",
   "nav.field": "ক্ষেত্ৰ", "nav.programme": "কাৰ্যসূচী",
   "nav.overview": "আভাস", "nav.screening": "স্ক্ৰীনিং", "nav.kit": "কিট কনছ'ল",
   "nav.dashboard": "জিলা ডেশ্ববৰ্ড", "nav.registry": "ৰেজিষ্ট্ৰী",
@@ -63,6 +65,7 @@ const AS: Dict = {
 };
 
 const PA: Dict = {
+  "nav.console": "ਮੇਰਾ ਕੰਸੋਲ", "nav.admin": "ਪ੍ਰਸ਼ਾਸਨ ਕੰਸੋਲ", "nav.signout": "ਸਾਈਨ ਆਊਟ",
   "nav.field": "ਖੇਤਰ", "nav.programme": "ਪ੍ਰੋਗਰਾਮ",
   "nav.overview": "ਮੰਚ", "nav.screening": "ਜਾਂਚ", "nav.kit": "ਕਿੱਟ ਕੰਸੋਲ",
   "nav.dashboard": "ਜ਼ਿਲ੍ਹਾ ਡੈਸ਼ਬੋਰਡ", "nav.registry": "ਰਜਿਸਟਰੀ",
@@ -77,6 +80,7 @@ const PA: Dict = {
 };
 
 const UR: Dict = {
+  "nav.console": "میرا کنسول", "nav.admin": "ایڈمن کنسول", "nav.signout": "سائن آؤٹ",
   "nav.field": "میدان", "nav.programme": "پروگرام",
   "nav.overview": "خلاصہ", "nav.screening": "اسکریننگ", "nav.kit": "کٹ کنسول",
   "nav.dashboard": "ضلع ڈیش بورڈ", "nav.registry": "رجسٹری",
@@ -91,6 +95,7 @@ const UR: Dict = {
 };
 
 const BN: Dict = {
+  "nav.console": "আমার কনসোল", "nav.admin": "অ্যাডমিন কনসোল", "nav.signout": "সাইন আউট",
   "nav.field": "ক্ষেত্র", "nav.programme": "প্রোগ্রাম",
   "nav.overview": "ওভারভিউ", "nav.screening": "স্ক্রিনিং", "nav.kit": "কিট কনসোল",
   "nav.dashboard": "জেলা ড্যাশবোর্ড", "nav.registry": "রেজিস্ট্রি",
@@ -105,6 +110,7 @@ const BN: Dict = {
 };
 
 const MR: Dict = {
+  "nav.console": "माझे कन्सोल", "nav.admin": "प्रशासन कन्सोल", "nav.signout": "साइन आउट",
   "nav.field": "क्षेत्र", "nav.programme": "कार्यक्रम",
   "nav.overview": "आढावा", "nav.screening": "तपासणी", "nav.kit": "किट कॉन्सोल",
   "nav.dashboard": "जिल्हा डॅशबोर्ड", "nav.registry": "नोंदणी",
@@ -237,6 +243,7 @@ const KHA: Dict = {};
 const GRT: Dict = {};
 
 const EN: Dict = {
+  "nav.console": "My console", "nav.admin": "Admin console", "nav.signout": "Sign out",
   "nav.field": "Field", "nav.programme": "Programme",
   "nav.overview": "Overview", "nav.screening": "Screening", "nav.kit": "Kit console",
   "nav.dashboard": "District dashboard", "nav.registry": "Registry",

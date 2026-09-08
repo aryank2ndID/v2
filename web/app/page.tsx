@@ -6,11 +6,15 @@ import { Card, CardHead, Stat, Section, SimBadge, Chip, Skeleton } from "@/compo
 import { HBars, Donut, Sparkline } from "@/components/Charts";
 import { useSandhi, pct, int, BAND_VAR } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
-import { IcArrow, IcScreen, IcClock, IcPin } from "@/components/Icons";
+import { useAuth, ROLE_HOME } from "@/lib/auth";
+import { UspGrid } from "@/components/UspGrid";
+import { MakeInIndia } from "@/components/Brand";
+import { IcArrow, IcScreen, IcClock, IcPin, IcUsers, IcHeart } from "@/components/Icons";
 
 export default function Overview() {
   const { cohort, metrics, ready } = useSandhi();
   const { t } = useI18n();
+  const { session } = useAuth();
 
   const stats = React.useMemo(() => {
     if (!cohort) return null;
@@ -30,7 +34,7 @@ export default function Overview() {
 
   return (
     <>
-      <TopBar title={t("nav.overview")} right={<Chip tone="chip-sky">SIH26004 · MDoNER</Chip>} />
+      <TopBar title={t("nav.overview")} right={<><MakeInIndia dark /><Chip tone="chip-sky">SIH26004 · MDoNER</Chip></>} />
       <div className="page">
 
         {/* ------------------------------------------------------ hero --- */}
@@ -52,12 +56,18 @@ export default function Overview() {
                 {t("hero.body")}
               </p>
               <div className="row wrap" style={{ gap: 10, marginTop: 26 }}>
-                <Link href="/screening" className="btn btn-primary btn-lg">
-                  <IcScreen size={15} />{t("hero.run")}
-                </Link>
-                <Link href="/dashboard" className="btn btn-lg">
-                  {t("hero.dash")}<IcArrow size={14} />
-                </Link>
+                {session ? (
+                  <Link href={ROLE_HOME[session.role]} className="btn btn-primary btn-lg">
+                    <IcScreen size={15} />Open my console
+                  </Link>
+                ) : (
+                  <Link href="/login" className="btn btn-primary btn-lg">
+                    <IcScreen size={15} />Sign in
+                  </Link>
+                )}
+                <a href="#consoles" className="btn btn-lg">
+                  See what it does<IcArrow size={14} />
+                </a>
               </div>
             </div>
 
@@ -84,6 +94,46 @@ export default function Overview() {
           />
         </div>
 
+        {/* ------------------------------------------------- two consoles - */}
+        <section id="consoles" style={{ marginTop: 30, scrollMarginTop: 84 }}>
+          <div className="between" style={{ marginBottom: 14, gap: 16, flexWrap: "wrap" }}>
+            <div>
+              <h2>Two consoles, two jobs</h2>
+              <div className="small dim" style={{ marginTop: 4, lineHeight: 1.55 }}>
+                What you sign in as decides what you see.
+              </div>
+            </div>
+          </div>
+          <div className="grid g2">
+            <RoleCard
+              tone="sage"
+              icon={<IcHeart size={17} />}
+              who="Medical volunteer"
+              lead="For the person in front of you."
+              points={["Screening history and plain-language advice", "Guided exercises that read themselves aloud", "Nearest physiotherapist, and who to call"]}
+              href={session?.role === "volunteer" ? "/volunteer" : "/login"}
+              cta={session?.role === "volunteer" ? "Open my console" : "Sign in as a volunteer"}
+            />
+            <RoleCard
+              tone="lilac"
+              icon={<IcUsers size={17} />}
+              who="Programme admin"
+              lead="For the district, not the individual."
+              points={["Health-worker roster and availability", "Camp assignment with ranked suggestions", "Census and coverage by district"]}
+              href={session?.role === "admin" ? "/admin" : "/login"}
+              cta={session?.role === "admin" ? "Open my console" : "Sign in as an admin"}
+            />
+          </div>
+        </section>
+
+        {/* ------------------------------------------------------ the USPs - */}
+        <Section
+          title="What makes it different"
+          sub="Nine things this does that a questionnaire, an X-ray queue or a fitness tracker does not."
+        >
+          <UspGrid signedIn={!!session} />
+        </Section>
+
         {/* --------------------------------------------- what it measures - */}
         <Section
           title="What the kit measures"
@@ -92,11 +142,11 @@ export default function Overview() {
           <div className="grid g3">
             {[
               { t: "Gait · 30 seconds", c: "var(--sky-bg)", l: "var(--sky-line)", k: "var(--sky-ink)",
-                d: "Two IMUs above and below the knee at 100 Hz capture cadence, stride variability and left/right asymmetry.",
-                w: "Osteoarthritic knees walk cautiously — shorter swing, longer double support, more variable strides." },
+                d: "Two IMUs at 100 Hz, above and below the knee.",
+                w: "A sore knee walks carefully — shorter swing, longer double support." },
               { t: "Sit-to-stand · 5 reps", c: "var(--lilac-bg)", l: "var(--lilac-line)", k: "var(--lilac-ink)",
-                d: "The thigh IMU during five chair rises measures total time, movement smoothness and rep-to-rep consistency.",
-                w: "A loaded, painful knee cannot generate the same extensor power. A validated clinical test." }
+                d: "Five chair rises, timed and measured for smoothness.",
+                w: "A painful knee cannot push the same way. A validated clinical test." }
             ].map((x) => (
               <div key={x.t} className="card" style={{ background: x.c, borderColor: x.l }}>
                 <div className="card-bd">
@@ -188,9 +238,9 @@ export default function Overview() {
           <div className="grid g3">
             {[
               { i: <IcPin size={15} />, t: "Terrain is the exposure",
-                d: "Terrace farming and slope walking put cyclic load through knees that plains-state models do not weight. Slope index is a model input, not decoration." },
+                d: "Slope index is a model input, not decoration — terrace farming loads knees a plains model never weights." },
               { i: <IcClock size={15} />, t: "The referral chain is long",
-                d: "X-ray sits at the district hospital, often half a day away over bad roads. Screening has to happen where the patient already is." },
+                d: "X-ray is half a day away over bad roads. Screening has to happen where the person already is." },
             ].map((x) => (
               <Card key={x.t}>
                 <div className="card-bd">
@@ -213,7 +263,7 @@ export default function Overview() {
                 }}><IcScreen size={15} /></span>
                 <h3>Works with no signal</h3>
                 <p className="small muted" style={{ marginTop: 7, lineHeight: 1.6 }}>
-                  An app that needs a network is an app that does not run. Inference, storage and results work with the radio off; sync is a background convenience.
+                  Inference, storage and results all work with the radio off. Sync is a convenience, never a dependency.
                 </p>
               </div>
             </Card>
@@ -242,6 +292,46 @@ export default function Overview() {
         <style>{`@media (max-width: 900px){ .hero-strip{ grid-template-columns: repeat(2,1fr) !important } }`}</style>
       </div>
     </>
+  );
+}
+
+/** One of the two doors into the app. Three points, one button — a landing
+    page that lists eleven features sells none of them. */
+function RoleCard({ tone, icon, who, lead, points, href, cta }: {
+  tone: string; icon: React.ReactNode; who: string; lead: string;
+  points: string[]; href: string; cta: string;
+}) {
+  return (
+    <Card className="lift" style={{ borderColor: `var(--${tone}-line)` }}>
+      <div className="card-bd">
+        <div className="row" style={{ gap: 11 }}>
+          <span style={{
+            width: 38, height: 38, flex: "0 0 38px", borderRadius: 13, display: "grid", placeItems: "center",
+            background: `var(--${tone}-bg)`, color: `var(--${tone}-ink)`, border: `1px solid var(--${tone}-line)`,
+          }}>{icon}</span>
+          <div>
+            <h3 style={{ fontSize: 16 }}>{who}</h3>
+            <div className="tiny dim" style={{ marginTop: 2 }}>{lead}</div>
+          </div>
+        </div>
+
+        <ul style={{ listStyle: "none", margin: "16px 0 0", padding: 0, display: "grid", gap: 9 }}>
+          {points.map((pt) => (
+            <li key={pt} className="row" style={{ gap: 9, fontSize: 13.2, color: "var(--ink-2)", lineHeight: 1.45 }}>
+              <span style={{
+                width: 5, height: 5, borderRadius: 99, flex: "0 0 5px", marginTop: 7,
+                background: `var(--${tone}-ink)`, alignSelf: "flex-start",
+              }} />
+              {pt}
+            </li>
+          ))}
+        </ul>
+
+        <Link href={href} className="btn btn-primary" style={{ marginTop: 18, width: "100%" }}>
+          {cta}<IcArrow size={13} />
+        </Link>
+      </div>
+    </Card>
   );
 }
 

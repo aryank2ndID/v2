@@ -4,6 +4,7 @@ import "./globals.css";
 import { SandhiProvider } from "@/lib/store";
 import { ThemeProvider } from "@/lib/theme";
 import { I18nProvider } from "@/lib/i18n";
+import { AuthProvider } from "@/lib/auth";
 import { Shell } from "@/components/Shell";
 import { ServiceWorker } from "@/components/ServiceWorker";
 
@@ -37,7 +38,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0F2440",
+  themeColor: "#0E6E56",
   colorScheme: "light dark",
   width: "device-width",
   initialScale: 1,
@@ -49,10 +50,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <ThemeProvider>
           <I18nProvider>
-            <SandhiProvider>
-              <ServiceWorker />
-              <Shell>{children}</Shell>
-            </SandhiProvider>
+            <AuthProvider>
+              <SandhiProvider>
+                <ServiceWorker />
+                <Shell>{children}</Shell>
+              </SandhiProvider>
+            </AuthProvider>
           </I18nProvider>
         </ThemeProvider>
       </body>

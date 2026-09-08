@@ -34,3 +34,20 @@ export const IcUser = (p: P) => (<Base {...p}><circle cx="8" cy="5.4" r="2.7"/><
 export const IcClock = (p: P) => (<Base {...p}><circle cx="8" cy="8" r="6.2"/><path d="M8 4.4V8l2.4 1.6"/></Base>);
 export const IcDownload = (p: P) => (<Base {...p}><path d="M8 2.2v8M4.8 7l3.2 3.2L11.2 7"/><path d="M2.6 13.4h10.8"/></Base>);
 export const IcFilter = (p: P) => (<Base {...p}><path d="M2 3.6h12L9.4 8.4v4.4l-2.8 1.2V8.4L2 3.6Z"/></Base>);
+
+/* --- role console icons --------------------------------------------------- */
+export const IcHeart = (p: P) => (<Base {...p}><path d="M8 13.7S1.9 10.1 1.9 6a3.3 3.3 0 0 1 6.1-1.8A3.3 3.3 0 0 1 14.1 6c0 4.1-6.1 7.7-6.1 7.7Z"/></Base>);
+export const IcPhone = (p: P) => (<Base {...p}><path d="M5.6 2.4 7 5.1 5.6 6.6a8.6 8.6 0 0 0 3.8 3.8l1.5-1.4 2.7 1.4v2.4c0 .6-.5 1.1-1.1 1.1A11.4 11.4 0 0 1 1.5 2.5c0-.6.5-1.1 1.1-1.1h2.4Z"/></Base>);
+export const IcCalendar = (p: P) => (<Base {...p}><rect x="2" y="3.2" width="12" height="11" rx="1.6"/><path d="M2 6.6h12M5.4 1.6v2.6M10.6 1.6v2.6"/></Base>);
+export const IcCloud = (p: P) => (<Base {...p}><path d="M4.4 12.6a3.1 3.1 0 0 1-.3-6.2 4.1 4.1 0 0 1 7.9-.6 2.9 2.9 0 0 1-.5 6.8H4.4Z"/></Base>);
+export const IcUsers = (p: P) => (<Base {...p}><circle cx="6.1" cy="5.5" r="2.4"/><path d="M1.9 13.4a4.3 4.3 0 0 1 8.4 0"/><path d="M10.6 3.4a2.4 2.4 0 0 1 0 4.2M11.8 9.6a4.3 4.3 0 0 1 2.4 3.8"/></Base>);
+export const IcMap = (p: P) => (<Base {...p}><path d="M1.9 4.1 6 2.4v9.5l-4.1 1.7V4.1ZM6 2.4l4 1.8v9.4L6 11.9V2.4ZM10 4.2l4.1-1.8v9.5L10 13.6V4.2Z"/></Base>);
+export const IcLogout = (p: P) => (<Base {...p}><path d="M6.2 14H3.4A1.4 1.4 0 0 1 2 12.6V3.4A1.4 1.4 0 0 1 3.4 2h2.8"/><path d="M10.4 11.2 13.6 8l-3.2-3.2M13.6 8H6.2"/></Base>);
+export const IcSpeaker = (p: P) => (<Base {...p}><path d="M7.6 2.6 4.4 5.4H2v5.2h2.4l3.2 2.8V2.6Z"/><path d="M10.4 5.8a3.1 3.1 0 0 1 0 4.4M12.4 3.8a5.9 5.9 0 0 1 0 8.4"/></Base>);
+export const IcHistory = (p: P) => (<Base {...p}><path d="M2.4 8a5.7 5.7 0 1 0 1.7-4"/><path d="M1.9 2.2v2.6h2.6M8 5v3.2l2.2 1.3"/></Base>);
+export const IcPlus = (p: P) => (<Base {...p}><path d="M8 3.2v9.6M3.2 8h9.6"/></Base>);
+export const IcSearch = (p: P) => (<Base {...p}><circle cx="7.1" cy="7.1" r="4.6"/><path d="M10.5 10.5 14 14"/></Base>);
+export const IcStar = (p: P) => (<Base {...p}><path d="M8 1.9 9.9 5.8l4.3.6-3.1 3 .7 4.3L8 11.7l-3.8 2 .7-4.3-3.1-3 4.3-.6L8 1.9Z"/></Base>);
+export const IcShield = (p: P) => (<Base {...p}><path d="M8 1.7 13.4 4v4.1c0 3.2-2.2 5.4-5.4 6.2-3.2-.8-5.4-3-5.4-6.2V4L8 1.7Z"/><path d="M5.9 8.1 7.4 9.6l2.9-3"/></Base>);
+export const IcActivity = (p: P) => (<Base {...p}><path d="M1.6 8h3l2-5 3 10 2-5h2.8"/></Base>);
+export const IcTarget = (p: P) => (<Base {...p}><circle cx="8" cy="8" r="6.2"/><circle cx="8" cy="8" r="3.3"/><circle cx="8" cy="8" r=".9" fill="currentColor" stroke="none"/></Base>);

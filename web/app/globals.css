@@ -5,58 +5,70 @@
    ========================================================================== */
 
 :root {
-  /* -- ground ------------------------------------------------------------ */
-  --paper:       #F8FAFC;
-  --paper-deep:  #F1F5F9;
+  /* -- ground ------------------------------------------------------------ *
+   * Warm clinical paper rather than cold white. Leading care brands
+   * (One Medical #F5F3EF, Hinge Health #FFFBED) moved off the institutional
+   * white-on-blue years ago; a warm base reads as care, not as a lab. */
+  --paper:       #FBF9F5;
+  --paper-deep:  #F4F1E9;
   --surface:     #FFFFFF;
-  --surface-2:   #F8FAFC;
-  --surface-3:   #F1F5F9;
+  --surface-2:   #F8F6F1;
+  --surface-3:   #F0ECE3;
 
   /* -- ink --------------------------------------------------------------- */
-  --ink:         #0F172A;
-  --ink-2:       #334155;
-  --ink-3:       #64748B;
-  --ink-4:       #8494A8;
+  /* Contrast on --paper (#FBF9F5), measured: 13.4 / 7.3 / 4.9 / 3.3.
+     ink-3 carries every caption and subtitle, so it has to clear 4.5:1 for
+     normal text; ink-4 is decorative and icon-weight only, so 3:1 is its bar.
+     WCAG 2.1 AA is the standard healthcare sites are now held to. */
+  --ink:         #15302A;
+  --ink-2:       #44574F;
+  --ink-3:       #5F7168;
+  --ink-4:       #7C8D84;
 
   /* -- structure --------------------------------------------------------- */
-  --line:        #E2E8F0;
-  --line-soft:   #F1F5F9;
-  --line-strong: #CBD5E1;
+  --line:        #E6E1D6;
+  --line-soft:   #F1EDE5;
+  --line-strong: #D4CDBF;
 
-  /* -- accent families --------------------------------------------------- */
-  --blush-bg:  #FFF1F2;  --blush-mid:  #FECDD3;  --blush-line: #FDA4AF;  --blush-ink: #E11D48;
-  --sky-bg:    #E0F2FE;  --sky-mid:    #BAE6FD;  --sky-line:   #7DD3FC;  --sky-ink:   #0369A1;
-  --sage-bg:   #F0FDF4;  --sage-mid:   #BBF7D0;  --sage-line:  #86EFAC;  --sage-ink:  #15803D;
-  --amber-bg:  #FFFBEB;  --amber-mid:  #FDE68A;  --amber-line: #FCD34D;  --amber-ink: #B45309;
-  --lilac-bg:  #F5F3FF;  --lilac-mid:  #DDD6FE;  --lilac-line: #C4B5FD;  --lilac-ink: #6D28D9;
-  --clay-bg:   #FFF7ED;  --clay-mid:   #FED7AA;  --clay-line:  #FDBA74;  --clay-ink:  #C2410C;
+  /* -- accent families ---------------------------------------------------
+   * Named by feel, not by hue, so the meaning survives a re-tune.
+   * sage = safe · amber = watch · clay = refer · sky = measurement
+   * lilac = movement · blush = alert                                     */
+  --blush-bg:  #FDEFF1;  --blush-mid:  #F8D3D9;  --blush-line: #EFAAB5;  --blush-ink: #B02A45;
+  --sky-bg:    #E3F2F0;  --sky-mid:    #BEE1DE;  --sky-line:   #86C7C3;  --sky-ink:   #0B6A68;
+  --sage-bg:   #EAF6EC;  --sage-mid:   #C7E7CF;  --sage-line:  #90CFA2;  --sage-ink:  #1E7A46;
+  --amber-bg:  #FFF6E7;  --amber-mid:  #FCE4B7;  --amber-line: #F3C87B;  --amber-ink: #A2620F;
+  --lilac-bg:  #F2F0FA;  --lilac-mid:  #DCD6EF;  --lilac-line: #BBB0DE;  --lilac-ink: #5C4C9F;
+  --clay-bg:   #FDF1EB;  --clay-mid:   #F8D5C4;  --clay-line:  #EFB095;  --clay-ink:  #B24521;
 
   /* -- semantic ---------------------------------------------------------- */
   --band-low-bg:    var(--sage-bg);   --band-low-ink:   var(--sage-ink);   --band-low-line:  var(--sage-line);
   --band-watch-bg:  var(--amber-bg);  --band-watch-ink: var(--amber-ink);  --band-watch-line: var(--amber-line);
   --band-refer-bg:  var(--clay-bg);   --band-refer-ink: var(--clay-ink);   --band-refer-line: var(--clay-line);
 
-  --accent:      #0E7490;
-  --accent-strong: #0C5F76;
-  --accent-soft: #E0F2FE;
+  /* deep clinical green — the one colour that means "act" */
+  --accent:        #0E6E56;
+  --accent-strong: #0A5744;
+  --accent-soft:   #E0F0E8;
+  --accent-glow:   rgba(14, 110, 86, .28);
 
   /* -- sidebar / header -------------------------------------------------- */
-  --rail-bg:     linear-gradient(180deg, #123, #0F2440 55%, #0C1F38 100%);
-  --rail-text:   rgba(255,255,255,.9);
-  --rail-text-2: rgba(255,255,255,.6);
-  --rail-text-3: rgba(255,255,255,.35);
-  --rail-border: rgba(255,255,255,.09);
-  --rail-accent: rgba(14,116,144,.25);
+  --rail-bg:     linear-gradient(178deg, #10473A 0%, #0D3830 58%, #0A2E28 100%);
+  --rail-text:   rgba(255,255,255,.92);
+  --rail-text-2: rgba(255,255,255,.62);
+  --rail-text-3: rgba(255,255,255,.38);
+  --rail-border: rgba(255,255,255,.10);
+  --rail-accent: rgba(144, 207, 162, .22);
 
   /* -- status ------------------------------------------------------------ */
-  --success:     #15803D;
-  --success-bg:  #F0FDF4;
-  --warning:     #B45309;
-  --warning-bg:  #FFFBEB;
-  --error:       #DC2626;
-  --error-bg:    #FEF2F2;
-  --info:        #0369A1;
-  --info-bg:     #E0F2FE;
+  --success:     #1E7A46;
+  --success-bg:  #EAF6EC;
+  --warning:     #A2620F;
+  --warning-bg:  #FFF6E7;
+  --error:       #C0362A;
+  --error-bg:    #FDEFEC;
+  --info:        #0B6A68;
+  --info-bg:     #E3F2F0;
 
   /* -- type -------------------------------------------------------------- */
   --sans: var(--sans), ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
@@ -65,56 +77,62 @@
   --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Mono",
           Menlo, Consolas, monospace;
 
-  /* -- elevation -------------------------------------------------------- */
-  --sh-1: 0 1px 3px rgba(15, 23, 42, .04), 0 1px 2px rgba(15, 23, 42, .03);
-  --sh-2: 0 4px 6px -1px rgba(15, 23, 42, .05), 0 2px 4px -2px rgba(15, 23, 42, .04);
-  --sh-3: 0 10px 15px -3px rgba(15, 23, 42, .06), 0 4px 6px -4px rgba(15, 23, 42, .04);
-  --sh-pop: 0 20px 25px -5px rgba(15, 23, 42, .1), 0 8px 10px -6px rgba(15,23,42,.06);
+  /* -- elevation --------------------------------------------------------
+   * Warm-tinted shadows: a neutral grey shadow over cream reads as dirt. */
+  --sh-1: 0 1px 2px rgba(37, 48, 40, .05), 0 1px 3px rgba(37, 48, 40, .04);
+  --sh-2: 0 2px 4px -1px rgba(37, 48, 40, .06), 0 4px 10px -3px rgba(37, 48, 40, .06);
+  --sh-3: 0 4px 8px -2px rgba(37, 48, 40, .07), 0 12px 22px -8px rgba(37, 48, 40, .09);
+  --sh-pop: 0 10px 18px -6px rgba(37, 48, 40, .14), 0 24px 48px -14px rgba(37, 48, 40, .18);
 
-  --r-xs: 6px;  --r-sm: 8px;  --r: 12px;  --r-lg: 16px;  --r-xl: 24px;
+  /* softer corners — the 2026 care-brand look is rounded, not boxed */
+  --r-xs: 8px;  --r-sm: 11px;  --r: 16px;  --r-lg: 22px;  --r-xl: 30px;
   --ease: cubic-bezier(.4, 0, .2, 1);
   --ease-press: cubic-bezier(.1, .9, .1, 1);
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
 }
 
 /* ------------------------------------------------------------------ dark -- */
 /* Theme is user-controlled via a [data-theme="dark"] attr on <html> (see the
    theme provider). Light is the default, so only the dark override lives here. */
 [data-theme="dark"] {
-  --paper:       #0B1220;
-  --paper-deep:  #070D18;
-  --surface:     #111A2B;
-  --surface-2:   #0E1626;
-  --surface-3:   #172234;
+  --paper:       #0A1512;
+  --paper-deep:  #06100E;
+  --surface:     #10201B;
+  --surface-2:   #0D1A16;
+  --surface-3:   #172C25;
 
-  --ink:         #E6EDF7;
-  --ink-2:       #B9C7DA;
-  --ink-3:       #8CA0B8;
-  --ink-4:       #6B7F98;
+  --ink:         #E7F0EA;
+  --ink-2:       #B4C8BD;
+  --ink-3:       #88A093;
+  --ink-4:       #6A8377;
 
-  --line:        #223150;
-  --line-soft:   #1A2740;
-  --line-strong: #31456A;
+  --line:        #223B32;
+  --line-soft:   #1A2E27;
+  --line-strong: #33564A;
 
-  --blush-bg: #2A1620;  --blush-mid: #4A2432;  --blush-line: #7A3C51;  --blush-ink: #FDA4AF;
-  --sky-bg:   #0E2033;  --sky-mid:   #15324C;  --sky-line:   #2E6C96;  --sky-ink:   #7DD3FC;
-  --sage-bg:  #0F2415;  --sage-mid:  #16391F;  --sage-line:  #2C6B3D;  --sage-ink:  #86EFAC;
-  --amber-bg: #2A200B;  --amber-mid: #4C3A12;  --amber-line: #7A5E1E;  --amber-ink: #FDE68A;
-  --lilac-bg: #1F1733;  --lilac-mid: #332663;  --lilac-line: #5B4896;  --lilac-ink: #C4B5FD;
-  --clay-bg:  #2A1C0C;  --clay-mid:  #4C3418;  --clay-line:  #7A5426;  --clay-ink:  #FDBA74;
+  --blush-bg: #2B141A;  --blush-mid: #4A2129;  --blush-line: #7A3846;  --blush-ink: #F0AAB5;
+  --sky-bg:   #0C2523;  --sky-mid:   #123A37;  --sky-line:   #2A7370;  --sky-ink:   #86C7C3;
+  --sage-bg:  #0E2417;  --sage-mid:  #163A24;  --sage-line:  #2C6E44;  --sage-ink:  #90CFA2;
+  --amber-bg: #2A1F0B;  --amber-mid: #4B3712;  --amber-line: #7A5C1F;  --amber-ink: #F3C87B;
+  --lilac-bg: #1C1830;  --lilac-mid: #2F275C;  --lilac-line: #56498F;  --lilac-ink: #BBB0DE;
+  --clay-bg:  #2B190E;  --clay-mid:  #4C2F1A;  --clay-line:  #7A4E2C;  --clay-ink:  #EFB095;
 
-  --accent:      #22B8DE;
-  --accent-strong: #38C9EE;
-  --accent-soft: #0E2033;
+  --accent:        #4FC79B;
+  --accent-strong: #6BD9AF;
+  --accent-soft:   #0E2A21;
+  --accent-glow:   rgba(79, 199, 155, .26);
 
-  --success:     #4ADE80;  --success-bg:  #0F2415;
-  --warning:     #FDE68A;   --warning-bg:  #2A200B;
-  --error:       #F87171;   --error-bg:    #2A1111;
-  --info:        #7DD3FC;   --info-bg:     #0E2033;
+  --rail-bg:     linear-gradient(178deg, #0C2B24 0%, #09211C 60%, #071A16 100%);
 
-  --sh-1: 0 1px 3px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.3);
-  --sh-2: 0 4px 6px -1px rgba(0,0,0,.5), 0 2px 4px -2px rgba(0,0,0,.4);
-  --sh-3: 0 10px 15px -3px rgba(0,0,0,.5), 0 4px 6px -4px rgba(0,0,0,.4);
-  --sh-pop: 0 20px 25px -5px rgba(0,0,0,.6), 0 8px 10px -6px rgba(0,0,0,.4);
+  --success:     #6BD9AF;  --success-bg:  #0E2417;
+  --warning:     #F3C87B;  --warning-bg:  #2A1F0B;
+  --error:       #F09B8C;  --error-bg:    #2B160F;
+  --info:        #86C7C3;  --info-bg:     #0C2523;
+
+  --sh-1: 0 1px 3px rgba(0,0,0,.45), 0 1px 2px rgba(0,0,0,.35);
+  --sh-2: 0 2px 6px -1px rgba(0,0,0,.5), 0 6px 14px -4px rgba(0,0,0,.45);
+  --sh-3: 0 6px 12px -3px rgba(0,0,0,.55), 0 16px 30px -10px rgba(0,0,0,.5);
+  --sh-pop: 0 14px 26px -8px rgba(0,0,0,.65), 0 30px 60px -18px rgba(0,0,0,.55);
 }
 
 [data-theme="dark"] { color-scheme: dark; }
@@ -211,7 +229,7 @@ p  { margin: 0; }
 
 .DrawerOverlay {
   position: fixed; inset: 0; z-index: 60;
-  background: rgba(15, 23, 42, .45);
+  background: rgba(12, 40, 34, .48);
   backdrop-filter: blur(2px);
   opacity: 0; pointer-events: none;
   transition: opacity .22s var(--ease);
@@ -400,14 +418,14 @@ p  { margin: 0; }
 .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
 .btn-primary {
   background: var(--accent); border-color: var(--accent); color: #FFFFFF;
-  box-shadow: 0 2px 8px rgba(14,116,144,.3);
+  box-shadow: 0 2px 10px var(--accent-glow);
 }
-.btn-primary:hover:not(:disabled) { background: var(--accent-strong); border-color: var(--accent-strong); box-shadow: 0 4px 16px rgba(14,116,144,.35); }
+.btn-primary:hover:not(:disabled) { background: var(--accent-strong); border-color: var(--accent-strong); box-shadow: 0 6px 20px var(--accent-glow); }
 .btn-accent {
   background: var(--sky-ink); border-color: var(--sky-ink); color: #FFFFFF;
-  box-shadow: 0 2px 8px rgba(3,105,161,.3);
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--sky-ink) 32%, transparent);
 }
-.btn-accent:hover:not(:disabled) { background: #03567F; border-color: #03567F; box-shadow: 0 4px 16px rgba(3,105,161,.35); }
+.btn-accent:hover:not(:disabled) { background: color-mix(in srgb, var(--sky-ink) 84%, #000); border-color: color-mix(in srgb, var(--sky-ink) 84%, #000); box-shadow: 0 6px 20px color-mix(in srgb, var(--sky-ink) 38%, transparent); }
 .btn-ghost { background: transparent; border-color: transparent; box-shadow: none; color: var(--ink-2); }
 .btn-ghost:hover { background: var(--surface-3); border-color: transparent; box-shadow: none; }
 .btn-sm { height: 30px; padding: 0 12px; font-size: 12.5px; border-radius: 6px; }
@@ -426,7 +444,7 @@ p  { margin: 0; }
 }
 .input:focus, .select:focus {
   outline: none; border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(14,116,144,.15);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
 }
 .select { appearance: none; padding-right: 30px;
   background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%237B8794' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
@@ -513,7 +531,7 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.1); }
 
 .noise-scrim {
   position: absolute; inset: 0; pointer-events: none; opacity: .25;
-  background-image: radial-gradient(circle at 1px 1px, rgba(15,23,42,.02) 1px, transparent 0);
+  background-image: radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--ink) 4%, transparent) 1px, transparent 0);
   background-size: 12px 12px;
 }
 
@@ -534,3 +552,325 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.1); }
   .table-hover tbody tr:hover { background: var(--surface-3); }
 }
 
+
+/* ==========================================================================
+   Interaction layer
+   Everything below exists so the app answers back: things enter, settle,
+   respond to a press and reflow when a filter changes. Motion is short
+   (<400 ms) — anything slower on a health screen reads as hesitation.
+   ========================================================================== */
+
+/* ------------------------------------------------------------ entry ------ */
+/* Declarative entry transition — no JS, no mount flag, no layout thrash. */
+.enter {
+  opacity: 1; translate: 0 0;
+  transition: opacity .34s var(--ease-out), translate .34s var(--ease-out);
+}
+@starting-style { .enter { opacity: 0; translate: 0 10px; } }
+
+/* Stagger a list by giving each row an index: style={{'--i': n}} */
+.enter-list > * {
+  opacity: 1; translate: 0 0;
+  transition: opacity .38s var(--ease-out), translate .38s var(--ease-out);
+  transition-delay: calc(var(--i, 0) * 42ms);
+}
+@starting-style { .enter-list > * { opacity: 0; translate: 0 12px; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .enter, .enter-list > * { translate: none; transition-duration: .01ms; }
+  @starting-style { .enter, .enter-list > * { translate: none; } }
+}
+
+/* --------------------------------------------------------- view transition */
+/* Role switches (volunteer ⇄ admin) cross-fade instead of blinking.
+   No `@view-transition` at-rule: routing here is client-side, so the
+   cross-document opt-in would only fire an transition the router then
+   aborts — these rules style the transitions React itself starts. */
+::view-transition-old(root) { animation: vtOut .18s var(--ease) both; }
+::view-transition-new(root) { animation: vtIn .26s var(--ease-out) both; }
+@keyframes vtOut { to { opacity: 0; } }
+@keyframes vtIn { from { opacity: 0; translate: 0 6px; } }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+}
+
+/* --------------------------------------------------------------- press --- */
+/* One shared physical response. A tap should feel like it landed. */
+.tap { transition: scale .12s var(--ease-press), box-shadow .18s var(--ease); cursor: pointer; }
+.tap:active { scale: .975; }
+
+/* ------------------------------------------------------------- lift ------ */
+.lift { transition: translate .22s var(--ease-out), box-shadow .22s var(--ease-out), border-color .22s var(--ease); }
+.lift:hover { translate: 0 -2px; box-shadow: var(--sh-3); border-color: var(--line-strong); }
+.lift:active { translate: 0 0; box-shadow: var(--sh-1); }
+@media (prefers-reduced-motion: reduce) { .lift:hover { translate: none; } }
+@media (hover: none) { .lift:hover { translate: none; box-shadow: var(--sh-1); } }
+
+/* ------------------------------------------------------ segmented tabs --- */
+/* Used everywhere a page has two or three modes. Big targets, obvious state. */
+.seg {
+  display: inline-flex; padding: 4px; gap: 2px; border-radius: 99px;
+  background: var(--surface-3); border: 1px solid var(--line);
+}
+.seg button {
+  border: 0; background: transparent; cursor: pointer;
+  min-height: 34px; padding: 0 16px; border-radius: 99px;
+  font-size: 13px; font-weight: 600; color: var(--ink-3);
+  display: inline-flex; align-items: center; gap: 7px;
+  transition: color .18s var(--ease), background-color .18s var(--ease), scale .12s var(--ease-press);
+  -webkit-tap-highlight-color: transparent;
+}
+.seg button:hover { color: var(--ink); }
+.seg button:active { scale: .96; }
+.seg button[aria-selected="true"],
+.seg button[data-on="true"] {
+  background: var(--surface); color: var(--accent);
+  box-shadow: var(--sh-1);
+}
+
+/* ----------------------------------------------------------- big tile ---- */
+/* The primary action shape for a low-literacy operator: icon, one word. */
+.tile {
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 18px; border-radius: var(--r-lg);
+  background: var(--surface); border: 1px solid var(--line);
+  box-shadow: var(--sh-1); text-align: left; cursor: pointer; width: 100%;
+  min-height: 108px;
+  transition: translate .2s var(--ease-out), box-shadow .2s var(--ease-out),
+              border-color .2s var(--ease), background-color .2s var(--ease);
+}
+.tile:hover { translate: 0 -3px; box-shadow: var(--sh-3); border-color: var(--accent); }
+.tile:active { translate: 0 0; box-shadow: var(--sh-1); }
+.tile .tile-ic {
+  width: 40px; height: 40px; border-radius: 13px; display: grid; place-items: center;
+  background: var(--accent-soft); color: var(--accent); flex: 0 0 40px;
+  transition: scale .2s var(--ease-out);
+}
+.tile:hover .tile-ic { scale: 1.08; }
+.tile-t { font-size: 14.5px; font-weight: 650; letter-spacing: -.012em; }
+.tile-s { font-size: 12.3px; color: var(--ink-3); line-height: 1.45; }
+@media (prefers-reduced-motion: reduce) { .tile:hover { translate: none; } .tile:hover .tile-ic { scale: 1; } }
+
+/* ------------------------------------------------------------ avatar ----- */
+.avatar {
+  width: 34px; height: 34px; border-radius: 99px; flex: 0 0 34px;
+  display: grid; place-items: center; font-weight: 700; font-size: 12.5px;
+  background: var(--accent-soft); color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+  letter-spacing: .01em;
+}
+.avatar-lg { width: 46px; height: 46px; flex-basis: 46px; font-size: 15px; }
+
+/* ------------------------------------------------------------ meter ------ */
+/* A value read at a glance from across a room. */
+.meter { position: relative; height: 8px; border-radius: 99px; background: var(--surface-3); overflow: hidden; }
+.meter > span {
+  position: absolute; inset: 0 auto 0 0; border-radius: 99px;
+  background: var(--accent);
+  transition: width .6s var(--ease-out);
+}
+
+/* --------------------------------------------------------- status dot ---- */
+.beacon { position: relative; width: 8px; height: 8px; border-radius: 99px; flex: 0 0 8px; }
+.beacon::after {
+  content: ""; position: absolute; inset: -4px; border-radius: 99px;
+  border: 1.5px solid currentColor; opacity: .5;
+  animation: beacon 2.2s var(--ease) infinite;
+}
+@keyframes beacon { 0% { scale: .6; opacity: .7 } 70%,100% { scale: 1.5; opacity: 0 } }
+@media (prefers-reduced-motion: reduce) { .beacon::after { animation: none; opacity: .35; } }
+
+/* ---------------------------------------------------------- auth page ---- */
+.auth {
+  min-height: 100vh; min-height: 100dvh;
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  background: var(--paper);
+}
+.auth-aside {
+  background: var(--rail-bg); color: #fff;
+  padding: 46px 52px; display: flex; flex-direction: column; justify-content: space-between;
+  position: relative; overflow: hidden;
+}
+.auth-aside::after {
+  /* a slow breathing halo — the page is alive before you type anything */
+  content: ""; position: absolute; width: 460px; height: 460px; border-radius: 99px;
+  right: -170px; bottom: -190px; pointer-events: none;
+  background: radial-gradient(circle, rgba(144,207,162,.18), transparent 68%);
+  animation: halo 9s var(--ease) infinite;
+}
+@keyframes halo { 0%,100% { scale: 1; opacity: .8 } 50% { scale: 1.12; opacity: 1 } }
+@media (prefers-reduced-motion: reduce) { .auth-aside::after { animation: none; } }
+
+.auth-panel {
+  display: grid; place-items: center; padding: 40px 28px;
+}
+.auth-card { width: 100%; max-width: 396px; }
+@media (max-width: 900px) {
+  .auth { grid-template-columns: 1fr; }
+  .auth-aside { display: none; }
+}
+
+/* form validation — feedback only after the field has been left */
+.err {
+  display: none; gap: 6px; align-items: center;
+  color: var(--error); font-size: 12.2px; margin-top: 6px;
+}
+.input:user-invalid, .input.is-invalid {
+  border-color: var(--error);
+  background: color-mix(in srgb, var(--error-bg) 70%, var(--surface));
+}
+.input:user-invalid ~ .err, .input.is-invalid ~ .err { display: flex; }
+.input:user-valid { border-color: color-mix(in srgb, var(--success) 55%, var(--line-strong)); }
+
+.pw-wrap { position: relative; display: flex; }
+.pw-wrap .input { padding-right: 46px; }
+.pw-eye {
+  position: absolute; right: 4px; top: 50%; translate: 0 -50%;
+  width: 36px; height: 36px; border: 0; background: transparent; border-radius: 9px;
+  display: grid; place-items: center; color: var(--ink-3); cursor: pointer;
+  transition: color .15s var(--ease), background-color .15s var(--ease);
+}
+.pw-eye:hover { color: var(--ink); background: var(--surface-3); }
+
+/* --------------------------------------------------------- timeline ------ */
+.tl { position: relative; padding-left: 26px; }
+.tl::before {
+  content: ""; position: absolute; left: 7px; top: 6px; bottom: 6px; width: 2px;
+  background: linear-gradient(var(--line-strong), var(--line));
+  border-radius: 99px;
+}
+.tl-node { position: relative; padding-bottom: 18px; }
+.tl-node::before {
+  content: ""; position: absolute; left: -23px; top: 5px;
+  width: 12px; height: 12px; border-radius: 99px;
+  background: var(--surface); border: 2.5px solid var(--dot, var(--line-strong));
+  transition: scale .2s var(--ease-out);
+}
+.tl-node:hover::before { scale: 1.25; }
+
+/* ------------------------------------------------------------ sheet ------ */
+/* Bottom sheet on phones, side drawer on desktop. Native <dialog>. */
+dialog.sheet {
+  border: 0; padding: 0; background: transparent; max-width: none; max-height: none;
+  width: 100%; height: 100%; margin: 0; inset: 0;
+}
+dialog.sheet::backdrop {
+  background: rgba(12, 40, 34, .46);
+  backdrop-filter: blur(3px);
+  opacity: 1; transition: opacity .26s var(--ease), display .26s allow-discrete;
+}
+@starting-style { dialog.sheet[open]::backdrop { opacity: 0; } }
+dialog.sheet:not([open])::backdrop { opacity: 0; }
+.sheet-body {
+  position: absolute; right: 0; top: 0; bottom: 0;
+  width: min(520px, 100%); background: var(--surface);
+  border-left: 1px solid var(--line); box-shadow: var(--sh-pop);
+  display: flex; flex-direction: column;
+  translate: 0 0; transition: translate .3s var(--ease-out);
+}
+@starting-style { dialog.sheet[open] .sheet-body { translate: 100% 0; } }
+@media (max-width: 640px) {
+  .sheet-body {
+    left: 0; top: auto; width: 100%; max-height: 88dvh;
+    border-left: 0; border-top: 1px solid var(--line);
+    border-radius: var(--r-xl) var(--r-xl) 0 0;
+  }
+  @starting-style { dialog.sheet[open] .sheet-body { translate: 0 100%; } }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sheet-body { transition-duration: .01ms; }
+  @starting-style { dialog.sheet[open] .sheet-body { translate: none; } }
+}
+
+/* -------------------------------------------------------- exercise ------- */
+/* Looping SVG figures — a picture of the movement, not a paragraph of it. */
+.ex-stage {
+  position: relative; border-radius: var(--r-lg); overflow: hidden;
+  background: linear-gradient(165deg, var(--sage-bg), var(--surface) 78%);
+  border: 1px solid var(--sage-line); aspect-ratio: 15 / 11;
+  display: grid; place-items: center; padding: 14px 16px 52px;
+}
+@keyframes exKnee  { 0%,100% { rotate: 0deg }  50% { rotate: -52deg } }
+@keyframes exRaise { 0%,100% { rotate: 0deg }  50% { rotate: -26deg } }
+@keyframes exStand { 0%,100% { translate: 0 18px; scale: 1 .9 } 50% { translate: 0 0; scale: 1 1 } }
+@keyframes exStep  { 0%,100% { translate: 0 0 }  50% { translate: 0 -11px } }
+
+.ex-count {
+  font-variant-numeric: tabular-nums; font-weight: 700;
+  font-size: 42px; letter-spacing: -.03em; line-height: 1;
+}
+
+/* ------------------------------------------------------------ ticker ----- */
+.rolling { display: inline-block; font-variant-numeric: tabular-nums; }
+
+/* --------------------------------------------------------- map bubble ---- */
+.bub { transition: r .4s var(--ease-out), opacity .3s var(--ease), fill .3s var(--ease); cursor: pointer; }
+.bub:hover { opacity: 1 !important; }
+
+/* -------------------------------------------------------- scroll reveal -- */
+/* Progressive enhancement: without support, content is simply already there. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: revealIn linear both;
+      animation-timeline: view();
+      animation-range: entry 8% cover 26%;
+    }
+    @keyframes revealIn { from { opacity: 0; translate: 0 16px; } to { opacity: 1; translate: 0 0; } }
+  }
+}
+
+/* ------------------------------------------------------------- misc ------ */
+.stack-g { display: flex; flex-direction: column; gap: 12px; }
+.g5 { display: grid; gap: 14px; grid-template-columns: repeat(5, minmax(0,1fr)); }
+@media (max-width: 1180px) { .g5 { grid-template-columns: repeat(3, minmax(0,1fr)); } }
+@media (max-width: 720px)  { .g5 { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+
+.scroll-x { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
+
+/* Every interactive target clears 44px on touch, per WCAG 2.1 AA. */
+@media (pointer: coarse) {
+  .btn { min-height: 44px; }
+  .btn-sm { min-height: 40px; }
+  .seg button { min-height: 42px; }
+  .nav-item { padding-block: 12px; }
+}
+
+/* ------------------------------------------------------------- splits ---- */
+/* Two-pane layouts: a list beside a detail, or a board beside its inspector.
+   Both collapse to one column before the narrow pane gets too tight to read —
+   an inline grid-template-columns cannot carry a breakpoint, so they live
+   here instead. */
+.split-list {
+  display: grid; gap: 18px; align-items: start;
+  grid-template-columns: minmax(0, 310px) minmax(0, 1fr);
+}
+.split-board {
+  display: grid; gap: 18px; align-items: start;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 400px);
+}
+@media (max-width: 1100px) {
+  .split-list, .split-board { grid-template-columns: minmax(0, 1fr); }
+  /* the inspector must not stay pinned once it is stacked below the board */
+  .split-board > .sticky-side { position: static; }
+}
+
+/* A card header squeezed into a narrow column should stack, not shred the
+   title into one word per line. */
+.card-hd { flex-wrap: wrap; }
+.card-hd > * { min-width: 0; }
+
+/* ------------------------------------------------------- topbar (phone) -- */
+.topbar-title {
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
+}
+@media (max-width: 620px) {
+  .topbar { gap: 8px; padding: 0 12px; }
+  .topbar-extra { display: none; }
+  .langctl > svg { display: none; }
+  .langctl .select, .select-xs { min-width: 0; width: 84px; padding: 0 24px 0 10px; }
+}
+
+/* The sign-in switcher spans its card, unlike the inline filter pills. */
+.seg-full > .seg { width: 100%; }
+.seg-full > .seg button { flex: 1; justify-content: center; }

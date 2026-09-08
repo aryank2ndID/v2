@@ -1,61 +1,83 @@
 "use client";
 import * as React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   IcOverview, IcScreen, IcKit, IcDash, IcRegistry,
-  IcWifi, IcWifiOff, IcSync, IcCheck,
+  IcWifi, IcWifiOff, IcSync, IcCheck, IcUsers, IcMap, IcLogout, IcHeart,
 } from "./Icons";
 import { useSandhi } from "@/lib/store";
 import { useI18n, LANGS } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme";
+import { useAuth, initials, ROLE_HOME, ROLE_LABEL, type Role } from "@/lib/auth";
+import { canOpen, accessFor } from "@/lib/routes";
 import { Toggle } from "./ui";
 
-const NAV = [
-  { group: "nav.field", items: [
-    { href: "/", label: "nav.overview", Icon: IcOverview },
-    { href: "/screening", label: "nav.screening", Icon: IcScreen },
-    { href: "/kit", label: "nav.kit", Icon: IcKit },
-  ]},
-  { group: "nav.programme", items: [
-    { href: "/dashboard", label: "nav.dashboard", Icon: IcDash },
-    { href: "/registry", label: "nav.registry", Icon: IcRegistry },
-  ]},
+interface NavItem { href: string; label: string; Icon: (p: { size?: number; className?: string }) => React.JSX.Element }
+interface NavGroup { group: string; items: NavItem[] }
+
+/* Each role gets its own map. A volunteer never sees a link they cannot open,
+   and an admin never sees a patient's exercise plan. */
+const NAV: Record<Role, NavGroup[]> = {
+  volunteer: [
+    { group: "nav.field", items: [
+      { href: "/volunteer", label: "nav.console", Icon: IcHeart },
+      { href: "/screening", label: "nav.screening", Icon: IcScreen },
+      { href: "/kit", label: "nav.kit", Icon: IcKit },
+    ]},
+  ],
+  admin: [
+    { group: "nav.programme", items: [
+      { href: "/admin", label: "nav.admin", Icon: IcUsers },
+      { href: "/dashboard", label: "nav.dashboard", Icon: IcDash },
+      { href: "/registry", label: "nav.registry", Icon: IcRegistry },
+    ]},
+  ],
+};
+
+const PUBLIC_NAV: NavGroup[] = [
+  { group: "nav.field", items: [{ href: "/", label: "nav.overview", Icon: IcOverview }] },
 ];
 
 function Mark() {
   const { t } = useI18n();
   return (
-    <div className="row" style={{ gap: 9, padding: "2px 10px 12px" }}>
-      <svg width="26" height="26" viewBox="0 0 28 28" fill="none" aria-hidden>
-        <rect width="28" height="28" rx="8" fill="var(--sky-bg)" stroke="var(--sky-line)" />
+    <Link href="/" className="row" style={{ gap: 9, padding: "2px 10px 12px" }}>
+      <svg width="27" height="27" viewBox="0 0 28 28" fill="none" aria-hidden>
+        <rect width="28" height="28" rx="9" fill="rgba(255,255,255,.10)" stroke="rgba(255,255,255,.18)" />
         {/* a knee joint in profile: femur, tibia, and the joint line between */}
-        <path d="M9 6.5v6.2c0 1.6 1.2 2.6 2.6 3.1" stroke="var(--sky-ink)" strokeWidth="1.7" strokeLinecap="round" />
-        <path d="M19 21.5v-5.6c0-1.7-1.3-2.7-2.8-3.2" stroke="var(--sky-ink)" strokeWidth="1.7" strokeLinecap="round" />
-        <path d="M10.4 14.2c2.6 1.9 5 2.2 7.4.6" stroke="var(--clay-ink)" strokeWidth="1.5" strokeLinecap="round" strokeDasharray="1.6 2" />
+        <path d="M9 6.5v6.2c0 1.6 1.2 2.6 2.6 3.1" stroke="#B8E6C6" strokeWidth="1.8" strokeLinecap="round" />
+        <path d="M19 21.5v-5.6c0-1.7-1.3-2.7-2.8-3.2" stroke="#B8E6C6" strokeWidth="1.8" strokeLinecap="round" />
+        <path d="M10.4 14.2c2.6 1.9 5 2.2 7.4.6" stroke="#F3C87B" strokeWidth="1.6" strokeLinecap="round" strokeDasharray="1.6 2" />
       </svg>
       <div style={{ lineHeight: 1.15 }}>
         <div style={{ fontWeight: 700, fontSize: 15, letterSpacing: "-0.02em", color: "#FFFFFF" }}>SANDHI</div>
         <div className="tiny" style={{ fontSize: 10.5, color: "var(--rail-text-3)" }}>{t("mark.tag")}</div>
       </div>
-    </div>
+    </Link>
   );
 }
 
-function RailContent() {
+function RailContent({ onNavigate }: { onNavigate?: () => void }) {
   const path = usePathname();
   const { t } = useI18n();
   const { online, setOnline, outbox, flush, syncing, serverUp, ready } = useSandhi();
+  const { session, loaded } = useAuth();
   const pending = outbox.filter((o) => o.state !== "sent").length;
+  // Until the saved session has been read, show nothing rather than the wrong
+  // menu — a rail that flashes "Overview" and then swaps to the role's own
+  // links looks broken on every single load.
+  const groups = !loaded ? [] : session ? NAV[session.role] : PUBLIC_NAV;
+
   return (
     <>
-      {NAV.map((g) => (
+      {groups.map((g) => (
         <div key={g.group}>
           <div className="eyebrow nav-group" style={{ color: "var(--rail-text-3)" }}>{t(g.group)}</div>
           {g.items.map(({ href, label, Icon }) => {
             const on = href === "/" ? path === "/" : path.startsWith(href);
             return (
-              <Link key={href} href={href} className={`nav-item ${on ? "on" : ""}`}>
+              <Link key={href} href={href} className={`nav-item ${on ? "on" : ""}`} onClick={onNavigate}>
                 <Icon className="ico" />
                 <span>{t(label)}</span>
                 {href === "/screening" && pending > 0 && <span className="nav-badge">{pending}</span>}
@@ -66,6 +88,7 @@ function RailContent() {
       ))}
 
       <div style={{ marginTop: "auto", paddingTop: 16 }}>
+        {/* Connectivity is the one system fact a field worker must always see. */}
         <div className="card card-quiet" style={{ padding: "10px 11px", background: "rgba(255,255,255,.06)", borderColor: "var(--rail-border)" }}>
           <div className="between" style={{ marginBottom: 8 }}>
             <span className="eyebrow" style={{ fontSize: 9.8, color: "var(--rail-text-3)" }}>{t("conn.title")}</span>
@@ -96,12 +119,50 @@ function RailContent() {
           </button>
         </div>
 
+        <AccountCard />
+
         <div className="tiny" style={{ marginTop: 12, lineHeight: 1.5, paddingLeft: 2, color: "var(--rail-text-3)" }}>
-          v0.4 · SIH26004<br />
+          v0.5 · SIH26004<br />
           {ready ? "Model bundle loaded" : "Loading model…"}
         </div>
       </div>
     </>
+  );
+}
+
+function AccountCard() {
+  const { session, signOut } = useAuth();
+  const router = useRouter();
+  if (!session) {
+    return (
+      <Link href="/login" className="btn btn-sm" style={{ marginTop: 14, width: "100%" }}>
+        Sign in
+      </Link>
+    );
+  }
+  return (
+    <div className="row" style={{
+      gap: 9, marginTop: 14, padding: "9px 10px", borderRadius: "var(--r-sm)",
+      background: "rgba(255,255,255,.06)", border: "1px solid var(--rail-border)",
+    }}>
+      <span className="avatar" style={{
+        width: 30, height: 30, flexBasis: 30, fontSize: 11.5,
+        background: "rgba(184,230,198,.16)", color: "#B8E6C6", borderColor: "rgba(184,230,198,.24)",
+      }}>{initials(session.name)}</span>
+      <div className="grow" style={{ minWidth: 0, lineHeight: 1.25 }}>
+        <div style={{ fontSize: 12.4, fontWeight: 620, color: "var(--rail-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          {session.name}
+        </div>
+        <div style={{ fontSize: 10.4, color: "var(--rail-text-3)" }}>{ROLE_LABEL[session.role]}</div>
+      </div>
+      <button
+        className="btn btn-sm btn-ghost" title="Sign out" aria-label="Sign out"
+        style={{ color: "var(--rail-text-3)", width: 30, padding: 0 }}
+        onClick={() => { signOut(); router.push("/login"); }}
+      >
+        <IcLogout size={14} />
+      </button>
+    </div>
   );
 }
 
@@ -111,6 +172,21 @@ const MenuCtx = React.createContext<{ open: boolean; toggle: () => void }>({ ope
 export function Shell({ children }: { children: React.ReactNode }) {
   const [menuOpen, setMenuOpen] = React.useState(false);
   const toggle = React.useCallback(() => setMenuOpen((o) => !o), []);
+  const path = usePathname();
+  const { session, loaded } = useAuth();
+  const router = useRouter();
+
+  // close the drawer whenever the route changes
+  React.useEffect(() => { setMenuOpen(false); }, [path]);
+
+  /* Route gate. A UI-level gate only — see lib/auth.tsx. Anyone landing on a
+     route their role cannot open is sent somewhere they can. */
+  React.useEffect(() => {
+    if (!loaded) return;
+    if (canOpen(path, session?.role ?? null)) return;
+    if (!session) router.replace("/login");
+    else router.replace(ROLE_HOME[session.role]);
+  }, [loaded, path, session, router]);
 
   // body scroll lock + Escape while the drawer is open
   React.useEffect(() => {
@@ -135,6 +211,13 @@ export function Shell({ children }: { children: React.ReactNode }) {
   }, [menuOpen]);
 
   const ctx = React.useMemo(() => ({ open: menuOpen, toggle }), [menuOpen, toggle]);
+
+  // The sign-in page owns the full viewport — no rail, no topbar.
+  if (path.startsWith("/login")) return <>{children}</>;
+
+  // Hold the frame rather than flashing a page the role may not keep.
+  const blocked = loaded && !canOpen(path, session?.role ?? null);
+  const gated = accessFor(path) !== "public";
 
   return (
     <MenuCtx.Provider value={ctx}>
@@ -171,13 +254,22 @@ export function Shell({ children }: { children: React.ReactNode }) {
                   </svg>
                 </button>
               </div>
-              <RailContent />
+              <RailContent onNavigate={() => setMenuOpen(false)} />
             </div>
           </div>
-          {children}
+          {gated && (!loaded || blocked) ? <Handoff /> : children}
         </div>
       </div>
     </MenuCtx.Provider>
+  );
+}
+
+/** Shown for the beat between "route needs a role" and the redirect landing. */
+function Handoff() {
+  return (
+    <div style={{ display: "grid", placeItems: "center", minHeight: "70vh", gap: 12 }}>
+      <div className="pulse dim" style={{ fontSize: 13 }}>Checking access…</div>
+    </div>
   );
 }
 
@@ -205,12 +297,14 @@ export function TopBar({ title, right }: { title: React.ReactNode; right?: React
     <div className="topbar">
       <MenuButton />
       <div className="grow row" style={{ gap: 10, minWidth: 0 }}>
-        <span style={{ fontWeight: 600, fontSize: 13.6 }}>{title}</span>
+        <span className="topbar-title" style={{ fontWeight: 600, fontSize: 13.6 }}>{title}</span>
       </div>
       <div className="row" style={{ gap: 9 }}>
         <ThemeToggle />
         <LangSelect />
-        {right}
+        {/* Page-specific chips are the first thing to go on a phone — the
+            same information is in the account card inside the drawer. */}
+        {right && <span className="topbar-extra row" style={{ gap: 9 }}>{right}</span>}
         {!online && (
           <span className="chip chip-amber"><IcWifiOff size={11} />Offline</span>
         )}
