@@ -1,3 +1,4 @@
+"use client";
 /* SANDHI — theme control.
  *
  * Light is the default (matching the app's print/clinic aesthetic). A toggle
@@ -5,7 +6,6 @@
  * remembered. SSR-safe: the attribute is applied only after mount, so the
  * server and first paint stay on the light default (no flash of wrong theme).
  */
-"use client";
 import * as React from "react";
 
 export type Theme = "light" | "dark";

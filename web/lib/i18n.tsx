@@ -1,3 +1,4 @@
+"use client";
 /* SANDHI — lightweight client-side i18n.
  *
  * Light (not a full framework): a dictionary of keys -> per-language strings,
@@ -6,7 +7,6 @@
  * common controls are translated so the app chrome is legible in each region
  * language the programme may run in.
  */
-"use client";
 import * as React from "react";
 
 export const LANGS: { code: string; name: string }[] = [
