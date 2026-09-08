@@ -32,20 +32,12 @@ Our solution replaces capital-intensive diagnostic infrastructure (such as MRI m
 ---
 ## 3. Peer-Reviewed References
 
-1. Pal CP, Singh P, Chaturvedi S, Pruthi KK, Vij A. Epidemiology of knee osteoarthritis in India and related factors. Indian J Orthop. 2016;50(5):518–522. doi:10.4103/0019-5413.189608.
-   **Link:** [https://doi.org/10.4103/0019-5413.189608](https://doi.org/10.4103/0019-5413.189608?utm_source=chatgpt.com)
-
-2. Mahajan A, Verma S, Tandon V. Osteoarthritis. J Assoc Physicians India. 2005;53:634–641. PMID: 16190135.
-   **Link:** [https://pubmed.ncbi.nlm.nih.gov/16190135/](https://pubmed.ncbi.nlm.nih.gov/16190135/?utm_source=chatgpt.com)
-
-3. Buragohain CR, Kalita P, Tahbildar P, Gogoi BP. Prevalence of primary osteoarthritis of knee in tea garden community of Jorhat District, Assam. IP International Journal of Orthopaedic Rheumatology. 2023;9(1):25–29. doi:10.18231/j.ijor.2023.004.
-   **Link:** [https://doi.org/10.18231/j.ijor.2023.004](https://doi.org/10.18231/j.ijor.2023.004?utm_source=chatgpt.com)
 
 4. GBD 2019 Osteoarthritis Collaborators. Global, regional, and national burden of osteoarthritis, 1990–2019: a systematic analysis for the Global Burden of Disease Study 2019. Lancet Rheumatol. 2020;2(9):e627–e638. doi:10.1016/S2665-9913(20)30227-9.
-   **Link:** [https://doi.org/10.1016/S2665-9913(20)30227-9](https://doi.org/10.1016/S2665-9913%2820%2930227-9?utm_source=chatgpt.com)
+   **Link:** [https://doi.org/10.1016/S2665-9913(20)30227-9](https://doi.org/10.1016/S2665-9913%2820%2930227-9?utm_source=chatgpt.com) /
 
 5. Picerno P. 25 years of lower limb joint kinematics by using inertial and magnetic sensors: A review of methodological approaches. Gait Posture. 2017;51:239–246. doi:10.1016/j.gaitpost.2016.11.008.
-   **Link:** [https://doi.org/10.1016/j.gaitpost.2016.11.008](https://doi.org/10.1016/j.gaitpost.2016.11.008?utm_source=chatgpt.com)
+   **Link:** [https://doi.org/10.1016/j.gaitpost.2016.11.008](https://doi.org/10.1016/j.gaitpost.2016.11.008?utm_source=chatgpt.com) ()
 
 6. Bharanidivya M, Dhanalakshmi S. TinyML-enabled wearable system for early detection of knee osteoarthritis using ensemble gait classification. Comput Biol Med. 2026;200:111345. doi:10.1016/j.compbiomed.2025.111345.
    **Link:** [https://doi.org/10.1016/j.compbiomed.2025.111345](https://doi.org/10.1016/j.compbiomed.2025.111345?utm_source=chatgpt.com)
@@ -58,3 +50,5 @@ Our solution replaces capital-intensive diagnostic infrastructure (such as MRI m
 
 9. Eckstein F, Kwoh CK, Link TM; OAI investigators. Imaging research results from the Osteoarthritis Initiative (OAI): a review and lessons learned 10 years after start of enrolment. Ann Rheum Dis. 2014;73(7):1289–1300. doi:10.1136/annrheumdis-2014-205310.
    **Link:** [https://doi.org/10.1136/annrheumdis-2014-205310](https://doi.org/10.1136/annrheumdis-2014-205310?utm_source=chatgpt.com)
+   
+
