@@ -11,7 +11,7 @@
 import * as React from "react";
 import { TopBar } from "@/components/Shell";
 import { Card, CardHead, Chip, SimBadge } from "@/components/ui";
-import { PhoneFrame } from "@/components/PhoneFrame";
+import { ScreeningCamera } from "@/components/ScreeningCamera";
 import { Scope } from "@/components/Scope";
 import {
   IcArrow, IcCheck, IcBluetooth, IcBattery, IcWifi, IcWifiOff, IcPlay,
@@ -196,27 +196,30 @@ export default function Screening() {
         }
       />
       <div className="page">
-        <div className="row screen-split" style={{ gap: 22, alignItems: "flex-start" }}>
-          <PhoneFrame status={
-            <>
-              <IcBluetooth size={11} />
-              {online ? <IcWifi size={11} /> : <IcWifiOff size={11} />}
-              <IcBattery size={13} />
-            </>
-          }>
-            <div style={{ padding: "4px 15px 20px" }}>
-              <div className="between" style={{ marginBottom: 12 }}>
-                <div className="row" style={{ gap: 7 }}>
-                  <div style={{
-                    width: 21, height: 21, borderRadius: 6, background: "var(--sky-bg)",
-                    border: "1px solid var(--sky-line)", display: "grid", placeItems: "center",
-                    fontSize: 10, fontWeight: 700, color: "var(--sky-ink)",
-                  }}>স</div>
-                  <span style={{ fontWeight: 620, fontSize: 13.5, letterSpacing: "-0.02em" }}>SANDHI</span>
-                </div>
-                <StepDots step={step} />
-              </div>
+        <StepRail step={step} />
 
+        <div className="row screen-split" style={{ gap: 22, alignItems: "flex-start", marginTop: 18 }}>
+          <div className="card scr-panel">
+            <div className="card-hd" style={{ background: "var(--surface-2)" }}>
+              <div className="row" style={{ gap: 9, minWidth: 0 }}>
+                <span style={{
+                  width: 26, height: 26, borderRadius: 8, background: "var(--sky-bg)",
+                  border: "1px solid var(--sky-line)", display: "grid", placeItems: "center",
+                  fontSize: 12, fontWeight: 700, color: "var(--sky-ink)", flex: "0 0 26px",
+                }}>স</span>
+                <div style={{ minWidth: 0 }}>
+                  <h3>{STEP_TITLE[step]}</h3>
+                  <div className="tiny dim">{STEP_SUB[step]}</div>
+                </div>
+              </div>
+              <div className="row" style={{ gap: 7, color: "var(--ink-3)" }}>
+                <IcBluetooth size={13} />
+                {online ? <IcWifi size={13} /> : <IcWifiOff size={13} />}
+                <IcBattery size={15} />
+              </div>
+            </div>
+
+            <div className="card-bd">
               {step === "intake" && (
                 <IntakeScreen intake={intake} setIntake={setIntake} districts={districts}
                               bmi={bmi} occ={occ} setStep={setStep} setPresetSev={setPresetSev} />
@@ -233,9 +236,13 @@ export default function Screening() {
                               onPrint={() => window.print()} />
               )}
             </div>
-          </PhoneFrame>
+          </div>
 
           <div className="grow stack" style={{ gap: 14, minWidth: 0 }}>
+            <ScreeningCamera
+              active={step === "capture" && (phase === "walk" || phase === "sts")}
+              label={phase === "walk" ? "30-second walk" : phase === "sts" ? "five chair rises" : "idle"}
+            />
             <SimBadge
               what="Sensor stream is emulated."
               why="No ESP32 is attached. Waveforms come from lib/dsp/simulator.ts at the real sampling rate (IMU 100 Hz). Everything downstream — feature extraction, the model, the outbox — is the production path."
@@ -311,6 +318,69 @@ export default function Screening() {
 }
 
 /* ------------------------------------------------------------- helpers --- */
+
+const STEP_ORDER: Step[] = ["intake", "fit", "capture", "result"];
+const STEP_TITLE: Record<Step, string> = {
+  intake: "New screening",
+  fit: "Fit the kit",
+  capture: "Capturing",
+  result: "Result",
+};
+const STEP_SUB: Record<Step, string> = {
+  intake: "Nine questions. The kit measures everything else.",
+  fit: "Two straps, about forty seconds.",
+  capture: "Walk, then five chair rises.",
+  result: "What to tell the person in front of you.",
+};
+const STEP_LABEL: Record<Step, string> = {
+  intake: "Questions", fit: "Fit", capture: "Capture", result: "Result",
+};
+
+/** A horizontal progress rail — the web equivalent of the old phone dots. */
+function StepRail({ step }: { step: Step }) {
+  const at = STEP_ORDER.indexOf(step);
+  return (
+    <div className="scr-rail card card-pad">
+      {STEP_ORDER.map((s, i) => {
+        const done = i < at, on = i === at;
+        return (
+          <div key={s} className="scr-rail-item" data-on={on} data-done={done}>
+            <span className="scr-rail-dot">
+              {done ? <IcCheck size={12} /> : <span className="num">{i + 1}</span>}
+            </span>
+            <span className="scr-rail-label">{STEP_LABEL[s]}</span>
+            {i < STEP_ORDER.length - 1 && <span className="scr-rail-line" />}
+          </div>
+        );
+      })}
+      <style>{`
+        .scr-rail { display: flex; gap: 0; align-items: center; padding: 14px 20px; flex-wrap: wrap; }
+        .scr-rail-item { display: flex; align-items: center; gap: 10px; flex: 1 1 120px; min-width: 0; }
+        .scr-rail-dot {
+          width: 26px; height: 26px; flex: 0 0 26px; border-radius: 99px; display: grid; place-items: center;
+          font-size: 11.5px; font-weight: 700; background: var(--surface-3); color: var(--ink-3);
+          border: 1px solid var(--line); transition: all .3s var(--ease);
+        }
+        .scr-rail-item[data-on="true"] .scr-rail-dot {
+          background: var(--accent); color: #fff; border-color: var(--accent);
+          box-shadow: 0 0 0 4px var(--accent-glow);
+        }
+        .scr-rail-item[data-done="true"] .scr-rail-dot {
+          background: var(--sage-bg); color: var(--sage-ink); border-color: var(--sage-line);
+        }
+        .scr-rail-label { font-size: 13px; font-weight: 600; color: var(--ink-3); white-space: nowrap; }
+        .scr-rail-item[data-on="true"] .scr-rail-label { color: var(--ink); }
+        .scr-rail-line { flex: 1 1 auto; height: 2px; border-radius: 2px; background: var(--line); margin: 0 12px; min-width: 16px; }
+        .scr-rail-item[data-done="true"] .scr-rail-line { background: var(--sage-line); }
+        /* min-width matters: without it the camera card's aspect box wins the
+           flex negotiation and squeezes the form down to a sliver. */
+        .scr-panel { flex: 1 1 460px; max-width: 560px; min-width: 420px; }
+        @media (max-width: 900px) { .scr-panel { min-width: 0; max-width: none; } }
+        @media (max-width: 760px) { .scr-rail-label { display: none; } }
+      `}</style>
+    </div>
+  );
+}
 
 function MiniStat({ label, value, sub, tone }: { label: string; value: React.ReactNode; sub: string; tone: string }) {
   return (
@@ -466,23 +536,7 @@ function WhyPanel({ result, model }: {
   );
 }
 
-/* ====================================================== PHONE SCREENS ==== */
-
-function StepDots({ step }: { step: Step }) {
-  const order: Step[] = ["intake", "fit", "capture", "result"];
-  const i = order.indexOf(step);
-  return (
-    <div className="row" style={{ gap: 4 }}>
-      {order.map((s, k) => (
-        <span key={s} style={{
-          width: k === i ? 14 : 5, height: 5, borderRadius: 99,
-          background: k <= i ? "var(--sky-ink)" : "var(--line-strong)",
-          transition: "all .3s var(--ease)",
-        }} />
-      ))}
-    </div>
-  );
-}
+/* ========================================================= STEP SCREENS === */
 
 function IntakeScreen({ intake, setIntake, districts, bmi, occ, setStep, setPresetSev }: {
   intake: Intake; setIntake: React.Dispatch<React.SetStateAction<Intake>>;
@@ -494,13 +548,6 @@ function IntakeScreen({ intake, setIntake, districts, bmi, occ, setStep, setPres
   const edit = <K extends keyof Intake>(k: K, v: Intake[K]) => { set(k, v); setPresetSev(null); };
   return (
     <div className="stack fade-in" style={{ gap: 13 }}>
-      <div>
-        <h3 style={{ fontSize: 16 }}>New screening</h3>
-        <p className="tiny dim" style={{ marginTop: 3, lineHeight: 1.45 }}>
-          Nine questions. The kit measures everything else.
-        </p>
-      </div>
-
       <div className="card card-quiet" style={{ padding: "9px 10px" }}>
         <div className="eyebrow" style={{ marginBottom: 6, fontSize: 9.6 }}>Demo shortcuts</div>
         <div className="stack" style={{ gap: 5 }}>
@@ -609,13 +656,6 @@ function FitScreen({ setStep, setPhase }: { setStep: (s: Step) => void; setPhase
   ];
   return (
     <div className="stack fade-in" style={{ gap: 13 }}>
-      <div>
-        <h3 style={{ fontSize: 16 }}>Fit the kit</h3>
-        <p className="tiny dim" style={{ marginTop: 3, lineHeight: 1.45 }}>
-          The patient can stay seated. About 40 seconds.
-        </p>
-      </div>
-
       <div style={{
         background: "var(--sky-bg)", border: "1px solid var(--sky-line)",
         borderRadius: "var(--r)", padding: "14px 12px", display: "grid", placeItems: "center",
@@ -686,8 +726,7 @@ function CaptureScreen({ phase, t, elapsed, totalSeconds, stsSeconds }: {
   const active = stages.findIndex((s) => s.k === phase);
   return (
     <div className="stack fade-in" style={{ gap: 14 }}>
-      <div className="between">
-        <h3 style={{ fontSize: 16 }}>Capturing</h3>
+      <div className="row" style={{ justifyContent: "flex-end" }}>
         <span className="chip chip-clay"><span className="dot pulse" />LIVE</span>
       </div>
 

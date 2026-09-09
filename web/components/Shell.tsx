@@ -212,8 +212,10 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
   const ctx = React.useMemo(() => ({ open: menuOpen, toggle }), [menuOpen, toggle]);
 
-  // The sign-in page owns the full viewport — no rail, no topbar.
-  if (path.startsWith("/login")) return <>{children}</>;
+  // The sign-in page and the public landing page own the full viewport —
+  // no rail, no topbar. A marketing page with an app sidebar bolted to it
+  // reads as a dashboard someone wandered into.
+  if (path.startsWith("/login") || path === "/") return <>{children}</>;
 
   // Hold the frame rather than flashing a page the role may not keep.
   const blocked = loaded && !canOpen(path, session?.role ?? null);

@@ -92,11 +92,11 @@ export function SimBadge({ what, why, compact }: { what: string; why?: string; c
   );
 }
 
-export function Section({ title, sub, right, children }: {
-  title: string; sub?: React.ReactNode; right?: React.ReactNode; children: React.ReactNode;
+export function Section({ title, sub, right, children, className = "" }: {
+  title: string; sub?: React.ReactNode; right?: React.ReactNode; children: React.ReactNode; className?: string;
 }) {
   return (
-    <section style={{ marginTop: 30 }}>
+    <section className={`reveal ${className}`} style={{ marginTop: 30 }}>
       <div className="between" style={{ marginBottom: 14, gap: 16 }}>
         <div>
           <h2>{title}</h2>
