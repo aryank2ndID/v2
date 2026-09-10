@@ -22,6 +22,7 @@ import {
   FEATURE_LABEL, FEATURE_UNIT, FEATURE_HINT, CHANNEL_LABEL, CHANNEL_CHIP,
 } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
+import { useAuth } from "@/lib/auth";
 import { Rng, OCCUPATIONS, synthWalk, synthSts, type Nuisance } from "@/lib/dsp/simulator";
 import { extract, toVector, gaitFeatures, stsFeatures } from "@/lib/dsp/features";
 import { predict, bandOf, explain, contributions } from "@/lib/model/runtime";
@@ -57,6 +58,8 @@ const PRESETS: { label: string; hint: string; v: Partial<Intake>; sev: number }[
 
 export default function Screening() {
   const { model, cohort, online, enqueue, flush } = useSandhi();
+  const { session: authSession } = useAuth();
+  const isSelf = authSession?.role === "user";
   const { t: tr } = useI18n();
   const [step, setStep] = React.useState<Step>("intake");
   const [intake, setIntake] = React.useState<Intake>(BLANK);
@@ -80,7 +83,7 @@ export default function Screening() {
      The seed is derived from the run counter and the intake answers rather
      than Math.random(): the server and the client must render the same first
      frame, and a reproducible seed also means a demo can be replayed exactly. */
-  const session = React.useMemo(() => {
+  const simSession = React.useMemo(() => {
     const seed = (runId + 1) * 7919
       + Math.round(intake.age * 31 + bmi * 97 + intake.occIdx * 613
         + intake.womac_pain * 17 + intake.womac_stiff * 53
@@ -110,7 +113,7 @@ export default function Screening() {
   }, [runId, intake.age, intake.sex_f, bmi, intake.occIdx, intake.prior_injury,
       intake.family_hx, presetSev, terrain, occ.squat, occ.stairs]);
 
-  const stsSeconds = session.sts.thigh_gyro.length / 100;
+  const stsSeconds = simSession.sts.thigh_gyro.length / 100;
   const DUR: Record<string, number> = { walk: 30, sts: stsSeconds };
 
   React.useEffect(() => {
@@ -139,7 +142,7 @@ export default function Screening() {
     const id = setTimeout(() => {
       const t0 = performance.now();
       const f = extract(
-        { walk: session.walk, sts: session.sts },
+        { walk: simSession.walk, sts: simSession.sts },
         {
           age: intake.age, sex_f: intake.sex_f, bmi,
           occ_squat_load: occ.squat, stairs_per_day: occ.stairs,
@@ -222,7 +225,7 @@ export default function Screening() {
             <div className="card-bd">
               {step === "intake" && (
                 <IntakeScreen intake={intake} setIntake={setIntake} districts={districts}
-                              bmi={bmi} occ={occ} setStep={setStep} setPresetSev={setPresetSev} />
+                              bmi={bmi} occ={occ} setStep={setStep} setPresetSev={setPresetSev} isSelf={isSelf} />
               )}
               {step === "fit" && <FitScreen setStep={setStep} setPhase={setPhase} />}
               {step === "capture" && (
@@ -273,29 +276,29 @@ export default function Screening() {
               <div className="card-bd stack" style={{ gap: 12 }}>
                 <div className="grid g2" style={{ gap: 12 }}>
                   <Scope label="Shank gyroscope · z" unit="°/s" height={58} live={phase === "walk"}
-                         data={session.walk.shank_gyro.subarray(0, walkUpto)}
+                         data={simSession.walk.shank_gyro.subarray(0, walkUpto)}
                          color="var(--sky-ink)" fill="var(--sky-bg)" />
                   <Scope label="Thigh gyroscope · z" unit="°/s" height={58} live={phase === "walk"}
-                         data={session.walk.thigh_gyro.subarray(0, walkUpto)}
+                         data={simSession.walk.thigh_gyro.subarray(0, walkUpto)}
                          color="var(--sky-ink)" fill="var(--sky-bg)" />
                   <Scope label="Knee flexion angle" unit="°" height={58} live={phase === "walk"}
-                         data={session.walk.knee_angle.subarray(0, walkUpto)}
+                         data={simSession.walk.knee_angle.subarray(0, walkUpto)}
                          color="var(--sage-ink)" fill="var(--sage-bg)" />
                   <Scope label="Shank accelerometer" unit="g" height={58} live={phase === "walk"}
-                         data={session.walk.shank_acc.subarray(0, walkUpto)}
+                         data={simSession.walk.shank_acc.subarray(0, walkUpto)}
                          color="var(--sage-ink)" fill="var(--sage-bg)" />
                 </div>
                 <div className="grid g2" style={{ gap: 12 }}>
                   <Scope label="Sit-to-stand · thigh angular velocity" unit="°/s" height={58} window={600}
                          live={phase === "sts"}
-                         data={session.sts.thigh_gyro.subarray(0,
-                           phase === "sts" ? sampleIdx : (phase === "idle" || phase === "walk") ? 0 : session.sts.thigh_gyro.length)}
+                         data={simSession.sts.thigh_gyro.subarray(0,
+                           phase === "sts" ? sampleIdx : (phase === "idle" || phase === "walk") ? 0 : simSession.sts.thigh_gyro.length)}
                          color="var(--lilac-ink)" fill="var(--lilac-bg)" />
                 </div>
               </div>
             </Card>
 
-            <LiveFeatures phase={phase} session={session} sampleIdx={sampleIdx} result={result} />
+            <LiveFeatures phase={phase} session={simSession} sampleIdx={sampleIdx} result={result} />
             {result && model && <WhyPanel result={result} model={model} />}
             {result && (
               <PrintReport
@@ -538,35 +541,40 @@ function WhyPanel({ result, model }: {
 
 /* ========================================================= STEP SCREENS === */
 
-function IntakeScreen({ intake, setIntake, districts, bmi, occ, setStep, setPresetSev }: {
+function IntakeScreen({ intake, setIntake, districts, bmi, occ, setStep, setPresetSev, isSelf }: {
   intake: Intake; setIntake: React.Dispatch<React.SetStateAction<Intake>>;
   districts: { id: string; name: string; state: string }[];
   bmi: number; occ: { squat: number; stairs: number };
   setStep: (s: Step) => void; setPresetSev: (v: number | null) => void;
+  isSelf?: boolean;
 }) {
   const set = <K extends keyof Intake>(k: K, v: Intake[K]) => setIntake((s) => ({ ...s, [k]: v }));
   const edit = <K extends keyof Intake>(k: K, v: Intake[K]) => { set(k, v); setPresetSev(null); };
   return (
     <div className="stack fade-in" style={{ gap: 13 }}>
-      <div className="card card-quiet" style={{ padding: "9px 10px" }}>
-        <div className="eyebrow" style={{ marginBottom: 6, fontSize: 9.6 }}>Demo shortcuts</div>
-        <div className="stack" style={{ gap: 5 }}>
-          {PRESETS.map((pr) => (
-            <button key={pr.label} className="btn btn-sm"
-                    style={{ justifyContent: "flex-start", height: "auto", padding: "6px 9px", width: "100%" }}
-                    onClick={() => { setIntake((s) => ({ ...s, ...pr.v })); setPresetSev(pr.sev); }}>
-              <IcUser size={12} style={{ flex: "0 0 12px", color: "var(--ink-3)" }} />
-              <span style={{ textAlign: "left", lineHeight: 1.25, minWidth: 0 }}>
-                <span style={{ display: "block", fontWeight: 560, fontSize: 12.2, whiteSpace: "nowrap" }}>{pr.label}</span>
-                <span className="tiny faint" style={{ display: "block", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{pr.hint}</span>
-              </span>
-            </button>
-          ))}
+      {/* A real patient screening themselves has no use for pretend villager
+          personas — those are a demo aid for a volunteer showing the flow. */}
+      {!isSelf && (
+        <div className="card card-quiet" style={{ padding: "9px 10px" }}>
+          <div className="eyebrow" style={{ marginBottom: 6, fontSize: 9.6 }}>Demo shortcuts</div>
+          <div className="stack" style={{ gap: 5 }}>
+            {PRESETS.map((pr) => (
+              <button key={pr.label} className="btn btn-sm"
+                      style={{ justifyContent: "flex-start", height: "auto", padding: "6px 9px", width: "100%" }}
+                      onClick={() => { setIntake((s) => ({ ...s, ...pr.v })); setPresetSev(pr.sev); }}>
+                <IcUser size={12} style={{ flex: "0 0 12px", color: "var(--ink-3)" }} />
+                <span style={{ textAlign: "left", lineHeight: 1.25, minWidth: 0 }}>
+                  <span style={{ display: "block", fontWeight: 560, fontSize: 12.2, whiteSpace: "nowrap" }}>{pr.label}</span>
+                  <span className="tiny faint" style={{ display: "block", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{pr.hint}</span>
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       <Field label="Name">
-        <input className="input" value={intake.name} placeholder="As on the ASHA register"
+        <input className="input" value={intake.name} placeholder={isSelf ? "Your full name" : "As on the ASHA register"}
                onChange={(e) => set("name", e.target.value)} />
       </Field>
 

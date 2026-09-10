@@ -245,8 +245,9 @@ const GRT: Dict = {};
 const EN: Dict = {
   "nav.console": "My console", "nav.admin": "Admin console", "nav.signout": "Sign out",
   "nav.field": "Field", "nav.programme": "Programme",
-  "nav.overview": "Overview", "nav.screening": "Screening", "nav.kit": "Kit console",
+  "nav.overview": "Overview", "nav.screening": "Screening",
   "nav.dashboard": "District dashboard", "nav.registry": "Registry",
+  "nav.self": "My health", "nav.user": "My console",
   "hero.track": "Hardware track", "hero.region": "North-Eastern Region", "hero.scope": "Screening, not diagnosis",
   "hero.h1a": "Three minutes, one strap,", "hero.h1b": "no doctor and no signal.",
   "hero.body": "SANDHI is a wearable kit and an offline model that let an ASHA worker screen a village for early knee osteoarthritis risk — from a 30-second walk, and five sit-to-stands.",

@@ -2,8 +2,8 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useAuth, ROLE_HOME, SEED_ACCOUNTS } from "@/lib/auth";
-import { IcCheck, IcArrow, IcAlert, IcPin, IcUser } from "@/components/Icons";
+import { useAuth, ROLE_HOME, ROLE_LABEL, SEED_ACCOUNTS } from "@/lib/auth";
+import { IcCheck, IcArrow, IcAlert, IcPin, IcUser, IcHeart } from "@/components/Icons";
 import { MakeInIndia } from "@/components/Brand";
 import { Tabs } from "@/components/Segmented";
 
@@ -35,7 +35,7 @@ export default function LoginPage() {
     if (loaded && session) router.replace(ROLE_HOME[session.role]);
   }, [loaded, session, router]);
 
-  const go = (r: { ok: true; role: "admin" | "volunteer" } | { ok: false; error: string }) => {
+  const go = (r: { ok: true; role: "admin" | "volunteer" | "user" } | { ok: false; error: string }) => {
     if (!r.ok) { setError(r.error); setBusy(false); return; }
     setError("");
     router.push(ROLE_HOME[r.role]);
@@ -79,8 +79,8 @@ export default function LoginPage() {
           </h1>
           <p className="dim" style={{ marginTop: 8, fontSize: 13.6, lineHeight: 1.55 }}>
             {mode === "in"
-              ? "Sign in to run screenings or open the district console."
-              : "New volunteers get a screening console and a worker ID."}
+              ? "Sign in to screen yourself, run screenings, or open the district console."
+              : "New accounts get their own screening console — for checking your own knees."}
           </p>
 
           <div style={{ marginTop: 22 }} className="seg-full">
@@ -176,10 +176,11 @@ function SignUpForm({ onSubmit, busy }: { onSubmit: (e: React.FormEvent<HTMLForm
       />
 
       <div className="field">
-        <label className="label" htmlFor="district">District you cover</label>
+        <label className="label" htmlFor="district">Your district</label>
         <select className="select" id="district" name="district" defaultValue="AS-JOR" required>
           {DISTRICTS.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
         </select>
+        <span className="hint">Used to show the nearest physiotherapist and hospital.</span>
       </div>
 
       <div className="field">
@@ -194,10 +195,11 @@ function SignUpForm({ onSubmit, busy }: { onSubmit: (e: React.FormEvent<HTMLForm
       </div>
 
       <button className="btn btn-primary btn-lg" type="submit" disabled={busy} style={{ marginTop: 4 }}>
-        {busy ? "Creating…" : "Create volunteer account"}
+        {busy ? "Creating…" : "Create my account"}
       </button>
       <p className="tiny dim" style={{ lineHeight: 1.55 }}>
-        Admin access is issued by the programme office, not self-served.
+        This creates a patient account for screening yourself. Volunteer and admin access are
+        issued by the programme office, not self-served.
       </p>
     </form>
   );
@@ -253,16 +255,16 @@ function DemoKeys({ onPick }: { onPick: (u: string, p: string) => void }) {
   return (
     <div style={{ marginTop: 24, paddingTop: 20, borderTop: "1px dashed var(--line)" }}>
       <div className="eyebrow" style={{ marginBottom: 10 }}>Demo access</div>
-      <div className="grid g2" style={{ gap: 10 }}>
+      <div className="grid g3" style={{ gap: 10 }}>
         {SEED_ACCOUNTS.map((a) => (
           <button key={a.username} className="tile tap" style={{ minHeight: 0, padding: 13, gap: 8 }}
                   onClick={() => onPick(a.username, a.password)}>
             <div className="row" style={{ gap: 9 }}>
               <span className="tile-ic" style={{ width: 30, height: 30, flexBasis: 30, borderRadius: 10 }}>
-                {a.role === "admin" ? <IcPin size={15} /> : <IcUser size={15} />}
+                {a.role === "admin" ? <IcPin size={15} /> : a.role === "volunteer" ? <IcUser size={15} /> : <IcHeart size={15} />}
               </span>
               <span className="tile-t" style={{ fontSize: 13.4 }}>
-                {a.role === "admin" ? "Admin" : "Volunteer"}
+                {ROLE_LABEL[a.role]}
               </span>
             </div>
             <span className="mono dim" style={{ fontSize: 11.4 }}>{a.username} / {a.password}</span>

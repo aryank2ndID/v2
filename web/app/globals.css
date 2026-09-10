@@ -1,41 +1,44 @@
 /* ==========================================================================
-   SANDHI design system — refined medical UI
-   Clean clinical surfaces, medical blue accents, generous whitespace,
-   polished micro-interactions. No webfont loaded — stays on platform stack.
+   SANDHI design system — hospital-blue UI
+   The same light-blue, rounded, friendly language as the public landing
+   page, carried into the console: cool paper, blue accent and sidebar,
+   generous whitespace. No webfont loaded — stays on platform stack.
    ========================================================================== */
 
 :root {
   /* -- ground ------------------------------------------------------------ *
-   * Warm clinical paper rather than cold white. Leading care brands
-   * (One Medical #F5F3EF, Hinge Health #FFFBED) moved off the institutional
-   * white-on-blue years ago; a warm base reads as care, not as a lab. */
-  --paper:       #FBF9F5;
-  --paper-deep:  #F4F1E9;
+   * Cool, light blue paper — the landing page's palette, not the old warm
+   * clinical cream. Reads as a modern hospital app, not a lab form. */
+  --paper:       #F6FAFF;
+  --paper-deep:  #EBF2FC;
   --surface:     #FFFFFF;
-  --surface-2:   #F8F6F1;
-  --surface-3:   #F0ECE3;
+  --surface-2:   #F2F7FD;
+  --surface-3:   #E7F0FB;
 
   /* -- ink --------------------------------------------------------------- */
-  /* Contrast on --paper (#FBF9F5), measured: 13.4 / 7.3 / 4.9 / 3.3.
+  /* Blue-slate instead of green-slate, matching the landing page's --ink.
      ink-3 carries every caption and subtitle, so it has to clear 4.5:1 for
      normal text; ink-4 is decorative and icon-weight only, so 3:1 is its bar.
      WCAG 2.1 AA is the standard healthcare sites are now held to. */
-  --ink:         #15302A;
-  --ink-2:       #44574F;
-  --ink-3:       #5F7168;
-  --ink-4:       #7C8D84;
+  --ink:         #14314D;
+  --ink-2:       #48647F;
+  --ink-3:       #6F8AA3;
+  --ink-4:       #8CA4BA;
 
   /* -- structure --------------------------------------------------------- */
-  --line:        #E6E1D6;
-  --line-soft:   #F1EDE5;
-  --line-strong: #D4CDBF;
+  --line:        #DCE8F7;
+  --line-soft:   #EAF2FB;
+  --line-strong: #C3D7EE;
 
   /* -- accent families ---------------------------------------------------
    * Named by feel, not by hue, so the meaning survives a re-tune.
    * sage = safe · amber = watch · clay = refer · sky = measurement
-   * lilac = movement · blush = alert                                     */
+   * lilac = movement · blush = alert
+   * sky now reads as true blue, matching the landing page's brand colour —
+   * everything else (the risk-band traffic lights) is untouched, since
+   * green/amber/red for low/watch/refer is a convention worth keeping. */
   --blush-bg:  #FDEFF1;  --blush-mid:  #F8D3D9;  --blush-line: #EFAAB5;  --blush-ink: #B02A45;
-  --sky-bg:    #E3F2F0;  --sky-mid:    #BEE1DE;  --sky-line:   #86C7C3;  --sky-ink:   #0B6A68;
+  --sky-bg:    #E6F7FF;  --sky-mid:    #BFEBFF;  --sky-line:   #7CD4FA;  --sky-ink:   #0E93C4;
   --sage-bg:   #EAF6EC;  --sage-mid:   #C7E7CF;  --sage-line:  #90CFA2;  --sage-ink:  #1E7A46;
   --amber-bg:  #FFF6E7;  --amber-mid:  #FCE4B7;  --amber-line: #F3C87B;  --amber-ink: #A2620F;
   --lilac-bg:  #F2F0FA;  --lilac-mid:  #DCD6EF;  --lilac-line: #BBB0DE;  --lilac-ink: #5C4C9F;
@@ -46,19 +49,24 @@
   --band-watch-bg:  var(--amber-bg);  --band-watch-ink: var(--amber-ink);  --band-watch-line: var(--amber-line);
   --band-refer-bg:  var(--clay-bg);   --band-refer-ink: var(--clay-ink);   --band-refer-line: var(--clay-line);
 
-  /* deep clinical green — the one colour that means "act" */
-  --accent:        #0E6E56;
-  --accent-strong: #0A5744;
-  --accent-soft:   #E0F0E8;
-  --accent-glow:   rgba(14, 110, 86, .28);
+  /* hospital blue — the one colour that means "act" */
+  --accent:        #1D6FE0;
+  --accent-strong: #1857B3;
+  --accent-soft:   #E3F0FF;
+  --accent-glow:   rgba(29, 111, 224, .28);
 
-  /* -- sidebar / header -------------------------------------------------- */
-  --rail-bg:     linear-gradient(178deg, #10473A 0%, #0D3830 58%, #0A2E28 100%);
-  --rail-text:   rgba(255,255,255,.92);
-  --rail-text-2: rgba(255,255,255,.62);
-  --rail-text-3: rgba(255,255,255,.38);
-  --rail-border: rgba(255,255,255,.10);
-  --rail-accent: rgba(144, 207, 162, .22);
+  /* -- sidebar / header ---------------------------------------------------
+   * Glass, not a solid panel: translucent blue over a backdrop-filter blur,
+   * so whatever page is underneath still shows through when it slides out. */
+  /* Neutral macOS-style vibrancy — plain grey glass, no colour tint, in
+     either theme. The nav text stays light-on-glass, so the tint has to
+     stay dark enough to carry it — flip it to white and the words vanish. */
+  --rail-bg:     rgba(30, 30, 32, .42);
+  --rail-text:   rgba(255,255,255,.94);
+  --rail-text-2: rgba(255,255,255,.66);
+  --rail-text-3: rgba(255,255,255,.42);
+  --rail-border: rgba(255,255,255,.22);
+  --rail-accent: rgba(255, 255, 255, .16);
 
   /* -- status ------------------------------------------------------------ */
   --success:     #1E7A46;
@@ -67,8 +75,8 @@
   --warning-bg:  #FFF6E7;
   --error:       #C0362A;
   --error-bg:    #FDEFEC;
-  --info:        #0B6A68;
-  --info-bg:     #E3F2F0;
+  --info:        #0E93C4;
+  --info-bg:     #E6F7FF;
 
   /* -- type -------------------------------------------------------------- */
   --sans: var(--sans), ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
@@ -78,11 +86,12 @@
           Menlo, Consolas, monospace;
 
   /* -- elevation --------------------------------------------------------
-   * Warm-tinted shadows: a neutral grey shadow over cream reads as dirt. */
-  --sh-1: 0 1px 2px rgba(37, 48, 40, .05), 0 1px 3px rgba(37, 48, 40, .04);
-  --sh-2: 0 2px 4px -1px rgba(37, 48, 40, .06), 0 4px 10px -3px rgba(37, 48, 40, .06);
-  --sh-3: 0 4px 8px -2px rgba(37, 48, 40, .07), 0 12px 22px -8px rgba(37, 48, 40, .09);
-  --sh-pop: 0 10px 18px -6px rgba(37, 48, 40, .14), 0 24px 48px -14px rgba(37, 48, 40, .18);
+   * Blue-tinted shadows to match the cool paper — a neutral grey shadow
+   * over a blue ground reads muddy. */
+  --sh-1: 0 1px 2px rgba(20, 45, 76, .06), 0 1px 3px rgba(20, 45, 76, .05);
+  --sh-2: 0 2px 4px -1px rgba(20, 45, 76, .07), 0 4px 10px -3px rgba(20, 45, 76, .07);
+  --sh-3: 0 4px 8px -2px rgba(20, 45, 76, .08), 0 12px 22px -8px rgba(20, 45, 76, .10);
+  --sh-pop: 0 10px 18px -6px rgba(20, 45, 76, .16), 0 24px 48px -14px rgba(20, 45, 76, .20);
 
   /* softer corners — the 2026 care-brand look is rounded, not boxed */
   --r-xs: 8px;  --r-sm: 11px;  --r: 16px;  --r-lg: 22px;  --r-xl: 30px;
@@ -95,39 +104,39 @@
 /* Theme is user-controlled via a [data-theme="dark"] attr on <html> (see the
    theme provider). Light is the default, so only the dark override lives here. */
 [data-theme="dark"] {
-  --paper:       #0A1512;
-  --paper-deep:  #06100E;
-  --surface:     #10201B;
-  --surface-2:   #0D1A16;
-  --surface-3:   #172C25;
+  --paper:       #071523;
+  --paper-deep:  #050F1A;
+  --surface:     #0D2033;
+  --surface-2:   #0A1A2A;
+  --surface-3:   #142B42;
 
-  --ink:         #E7F0EA;
-  --ink-2:       #B4C8BD;
-  --ink-3:       #88A093;
-  --ink-4:       #6A8377;
+  --ink:         #E8F2FD;
+  --ink-2:       #AFC6DC;
+  --ink-3:       #8199B0;
+  --ink-4:       #64809A;
 
-  --line:        #223B32;
-  --line-soft:   #1A2E27;
-  --line-strong: #33564A;
+  --line:        #1C3350;
+  --line-soft:   #142842;
+  --line-strong: #274566;
 
   --blush-bg: #2B141A;  --blush-mid: #4A2129;  --blush-line: #7A3846;  --blush-ink: #F0AAB5;
-  --sky-bg:   #0C2523;  --sky-mid:   #123A37;  --sky-line:   #2A7370;  --sky-ink:   #86C7C3;
+  --sky-bg:   #0A2C3A;  --sky-mid:   #0F435A;  --sky-line:   #1D7EA6;  --sky-ink:   #5FD4F5;
   --sage-bg:  #0E2417;  --sage-mid:  #163A24;  --sage-line:  #2C6E44;  --sage-ink:  #90CFA2;
   --amber-bg: #2A1F0B;  --amber-mid: #4B3712;  --amber-line: #7A5C1F;  --amber-ink: #F3C87B;
   --lilac-bg: #1C1830;  --lilac-mid: #2F275C;  --lilac-line: #56498F;  --lilac-ink: #BBB0DE;
   --clay-bg:  #2B190E;  --clay-mid:  #4C2F1A;  --clay-line:  #7A4E2C;  --clay-ink:  #EFB095;
 
-  --accent:        #4FC79B;
-  --accent-strong: #6BD9AF;
-  --accent-soft:   #0E2A21;
-  --accent-glow:   rgba(79, 199, 155, .26);
+  --accent:        #6FB4FF;
+  --accent-strong: #8FC6FF;
+  --accent-soft:   #123355;
+  --accent-glow:   rgba(111, 180, 255, .3);
 
-  --rail-bg:     linear-gradient(178deg, #0C2B24 0%, #09211C 60%, #071A16 100%);
+  --rail-bg:     rgba(22, 22, 24, .48);
 
   --success:     #6BD9AF;  --success-bg:  #0E2417;
   --warning:     #F3C87B;  --warning-bg:  #2A1F0B;
   --error:       #F09B8C;  --error-bg:    #2B160F;
-  --info:        #86C7C3;  --info-bg:     #0C2523;
+  --info:        #5FD4F5;  --info-bg:     #0A2C3A;
 
   --sh-1: 0 1px 3px rgba(0,0,0,.45), 0 1px 2px rgba(0,0,0,.35);
   --sh-2: 0 2px 6px -1px rgba(0,0,0,.5), 0 6px 14px -4px rgba(0,0,0,.45);
@@ -194,19 +203,60 @@ p  { margin: 0; }
 .tiny    { font-size: 11.5px; }
 
 /* --------------------------------------------------------------- layout -- */
-.app {
-  display: grid;
-  grid-template-columns: 238px minmax(0, 1fr);
-  min-height: 100vh;
-}
+/* No reserved sidebar column any more: the rail floats over the page and
+   only claims space when a pointer is near the left edge, so .app is a
+   plain full-width flow rather than a grid with a fixed gutter. */
+.app { min-height: 100vh; }
 
+/* ------------------------------------------------------- glass sidebar --- *
+ * Collapsed to a slim hint at the left edge; hovering (or focusing into it
+ * with the keyboard) expands it into a frosted glass panel that floats over
+ * the page rather than pushing it. Desktop only — .rail stays display:none
+ * under 980px, where the existing tap-to-open drawer takes over. */
 .rail {
-  border-right: 1px solid var(--rail-border);
-  background: var(--rail-bg);
+  position: fixed; left: 0; top: 0; bottom: 0; z-index: 70;
+  width: 15px;
   padding: 20px 14px 18px;
-  position: sticky; top: 0; height: 100vh;
   display: flex; flex-direction: column; gap: 4px;
-  overflow-y: auto;
+  overflow: hidden;
+  background: rgba(255, 255, 255, .04);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-right: 1px solid transparent;
+  box-shadow: none;
+  transition: width .3s var(--ease-out), background-color .3s var(--ease),
+              backdrop-filter .3s var(--ease), box-shadow .3s var(--ease), border-color .3s var(--ease);
+}
+.rail-hint {
+  position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+  background: rgba(255, 255, 255, .5);
+  opacity: .5;
+  transition: opacity .25s var(--ease);
+}
+.rail:hover, .rail:focus-within {
+  width: 258px;
+  background: var(--rail-bg);
+  backdrop-filter: blur(28px) saturate(1.7);
+  -webkit-backdrop-filter: blur(28px) saturate(1.7);
+  border-right: 1px solid var(--rail-border);
+  box-shadow: var(--sh-pop);
+}
+.rail:hover .rail-hint, .rail:focus-within .rail-hint { opacity: 0; }
+.rail-inner {
+  display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; gap: 4px;
+  overflow-y: auto; overflow-x: hidden;
+  opacity: 0; transform: translateX(-6px);
+  transition: opacity .18s var(--ease), transform .18s var(--ease);
+  /* the panel itself is only ~260px wide when open; letting inner content
+     wrap early (before the width transition finishes) looks like a glitch */
+  width: 230px;
+}
+.rail:hover .rail-inner, .rail:focus-within .rail-inner {
+  opacity: 1; transform: none;
+  transition: opacity .22s var(--ease) .08s, transform .22s var(--ease) .08s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rail, .rail-hint, .rail-inner { transition-duration: .01ms; }
 }
 
 .main { min-width: 0; display: flex; flex-direction: column; }
@@ -314,7 +364,6 @@ p  { margin: 0; }
 @media (max-width: 1180px) { .g4 { grid-template-columns: repeat(2, minmax(0,1fr)); } }
 @media (max-width: 980px) {
   .g3, .g2 { grid-template-columns: 1fr; }
-  .app { grid-template-columns: 1fr; }
   .rail { display: none; }
   .menubtn { display: inline-flex; }
   .DrawerOverlay { display: block; }
@@ -546,9 +595,9 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.1); }
    base rules so they win on equal specificity) */
 [data-theme="dark"] {
   .btn-primary, .btn-accent { color: #04121F; }
-  .btn-primary { box-shadow: 0 2px 8px rgba(34,184,222,.25); }
+  .btn-primary { box-shadow: 0 2px 8px var(--accent-glow); }
   .toggle.on::after { background: #04121F; }
-  .DrawerOverlay { background: rgba(2,6,16,.6); }
+  .DrawerOverlay { background: rgba(4,12,26,.65); }
   .table-hover tbody tr:hover { background: var(--surface-3); }
 }
 

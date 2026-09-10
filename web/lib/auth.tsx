@@ -2,13 +2,16 @@
 /**
  * SANDHI — who is holding the phone.
  *
- * Two roles, and they see two different products:
+ * Three roles, and they see three different products:
  *
  *   admin      — the programme. Districts, health-worker rosters, camp
  *                assignment, census. Never sees an individual's exercise plan.
- *   volunteer  — the medical volunteer / ASHA worker in a village, and the
- *                patient sitting in front of them. Screening history, guidance,
- *                exercises, appointments, helplines.
+ *   volunteer  — the medical volunteer / ASHA worker in a village, running
+ *                screenings for the people in front of them.
+ *   user       — a person screening themselves: their own kit, their own
+ *                camera, their own appointments and helplines. Anyone can
+ *                sign up as this role; volunteer and admin access is issued
+ *                by the programme, not self-served.
  *
  * The store is deliberately local. There is no auth server in this build, and
  * pretending otherwise would be worse than saying so: credentials are checked
@@ -20,7 +23,7 @@
  */
 import * as React from "react";
 
-export type Role = "admin" | "volunteer";
+export type Role = "admin" | "volunteer" | "user";
 
 export interface Account {
   username: string;
@@ -69,16 +72,27 @@ export const SEED_ACCOUNTS: Account[] = [
     workerId: "ASHA-JOR-0142",
     createdAt: 0,
   },
+  {
+    username: "priya",
+    password: "priya",
+    role: "user",
+    name: "Priya Devi",
+    district: "AS-JOR",
+    phone: "+91 91234 56789",
+    createdAt: 0,
+  },
 ];
 
 export const ROLE_HOME: Record<Role, string> = {
   admin: "/admin",
   volunteer: "/volunteer",
+  user: "/user",
 };
 
 export const ROLE_LABEL: Record<Role, string> = {
   admin: "Programme admin",
   volunteer: "Medical volunteer",
+  user: "Patient",
 };
 
 function readAccounts(): Account[] {
@@ -129,7 +143,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const raw = localStorage.getItem(SESSION_KEY);
       if (raw) {
         const s: Session = JSON.parse(raw);
-        if (s?.username && (s.role === "admin" || s.role === "volunteer")) setSession(s);
+        if (s?.username && (s.role === "admin" || s.role === "volunteer" || s.role === "user")) setSession(s);
       }
     } catch { /* ignore */ }
     setLoaded(true);
@@ -169,21 +183,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (all.some((a) => a.username.toLowerCase() === u)) {
       return { ok: false, error: "That username is already taken." };
     }
-    // Sign-up always creates a volunteer. Admin access is granted by the
-    // programme office, never self-served.
+    // Sign-up always creates a patient ("user") account, for screening
+    // yourself. Volunteer and admin access is issued by the programme office,
+    // never self-served.
     const account: Account = {
       username: u,
       password: input.password,
-      role: "volunteer",
+      role: "user",
       name: input.name.trim() || u,
       district: input.district,
       phone: input.phone.trim(),
-      workerId: `ASHA-${input.district.split("-")[1] ?? "NER"}-${Math.floor(Math.random() * 9000 + 1000)}`,
       createdAt: Date.now(),
     };
     writeAccounts([...all, account]);
     start(account);
-    return { ok: true, role: "volunteer" };
+    return { ok: true, role: "user" };
   }, [start]);
 
   const signOut = React.useCallback(() => {

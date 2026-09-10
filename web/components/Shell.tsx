@@ -3,7 +3,7 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  IcOverview, IcScreen, IcKit, IcDash, IcRegistry,
+  IcOverview, IcScreen, IcDash, IcRegistry,
   IcWifi, IcWifiOff, IcSync, IcCheck, IcUsers, IcMap, IcLogout, IcHeart,
 } from "./Icons";
 import { useSandhi } from "@/lib/store";
@@ -23,7 +23,6 @@ const NAV: Record<Role, NavGroup[]> = {
     { group: "nav.field", items: [
       { href: "/volunteer", label: "nav.console", Icon: IcHeart },
       { href: "/screening", label: "nav.screening", Icon: IcScreen },
-      { href: "/kit", label: "nav.kit", Icon: IcKit },
     ]},
   ],
   admin: [
@@ -31,6 +30,12 @@ const NAV: Record<Role, NavGroup[]> = {
       { href: "/admin", label: "nav.admin", Icon: IcUsers },
       { href: "/dashboard", label: "nav.dashboard", Icon: IcDash },
       { href: "/registry", label: "nav.registry", Icon: IcRegistry },
+    ]},
+  ],
+  user: [
+    { group: "nav.self", items: [
+      { href: "/user", label: "nav.user", Icon: IcHeart },
+      { href: "/screening", label: "nav.screening", Icon: IcScreen },
     ]},
   ],
 };
@@ -225,8 +230,11 @@ export function Shell({ children }: { children: React.ReactNode }) {
     <MenuCtx.Provider value={ctx}>
       <div className="app">
         <aside className="rail">
-          <Mark />
-          <RailContent />
+          <span className="rail-hint" aria-hidden />
+          <div className="rail-inner">
+            <Mark />
+            <RailContent />
+          </div>
         </aside>
 
         <div className="main">

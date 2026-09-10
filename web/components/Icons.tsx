@@ -51,3 +51,4 @@ export const IcStar = (p: P) => (<Base {...p}><path d="M8 1.9 9.9 5.8l4.3.6-3.1 
 export const IcShield = (p: P) => (<Base {...p}><path d="M8 1.7 13.4 4v4.1c0 3.2-2.2 5.4-5.4 6.2-3.2-.8-5.4-3-5.4-6.2V4L8 1.7Z"/><path d="M5.9 8.1 7.4 9.6l2.9-3"/></Base>);
 export const IcActivity = (p: P) => (<Base {...p}><path d="M1.6 8h3l2-5 3 10 2-5h2.8"/></Base>);
 export const IcTarget = (p: P) => (<Base {...p}><circle cx="8" cy="8" r="6.2"/><circle cx="8" cy="8" r="3.3"/><circle cx="8" cy="8" r=".9" fill="currentColor" stroke="none"/></Base>);
+export const IcCamera = (p: P) => (<Base {...p}><path d="M2 5.6c0-.9.7-1.6 1.6-1.6h1.1l.7-1.1h5.2l.7 1.1h1.1c.9 0 1.6.7 1.6 1.6v6.3c0 .9-.7 1.6-1.6 1.6H3.6C2.7 13.5 2 12.8 2 11.9V5.6Z"/><circle cx="8" cy="8.6" r="2.5"/></Base>);
